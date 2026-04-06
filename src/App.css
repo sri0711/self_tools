@@ -1,0 +1,174 @@
+.floatingMenuButton {
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	border: none;
+	color: white;
+	font-size: 1.5rem;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	transition: all 0.3s ease;
+	z-index: 999;
+}
+
+.diffButton_1 {
+	position: fixed;
+	top: 20px;
+	right: 50%;
+	margin-right: 10px;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, #2f43a7 0%, #985521 100%);
+	border: none;
+	color: white;
+	font-size: 1.5rem;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	transition: all 0.3s ease;
+	z-index: 999;
+}
+
+.diffButton_2 {
+	position: fixed;
+	top: 20px;
+	right: 80px;
+	margin-right: 10px;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, #3ba72f 0%, #b52de7 100%);
+	border: none;
+	color: white;
+	font-size: 1.5rem;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	transition: all 0.3s ease;
+	z-index: 999;
+}
+
+.floatingMenuButton:hover {
+	transform: scale(1.1);
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.floatingMenuButton:active {
+	transform: scale(0.95);
+}
+
+.floatingEditButton {
+	position: fixed;
+	top: 20px;
+	right: 80px;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+	border: none;
+	color: white;
+	font-size: 1.5rem;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	transition: all 0.3s ease;
+	z-index: 999;
+}
+
+.floatingEditButton:hover {
+	transform: scale(1.1);
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.floatingEditButton:active {
+	transform: scale(0.95);
+}
+
+.appDrawer {
+	width: 100% !important;
+	max-width: 350px;
+	background: rgba(255, 250, 250, 0.65);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.3);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+	border-top-left-radius: 10px;
+	border-bottom-left-radius: 10px;
+}
+
+.appDrawer .offcanvas {
+	width: 100% !important;
+	max-width: 350px;
+}
+
+.appHeader {
+	background: linear-gradient(
+		to bottom,
+		#ffffff65 80%,
+		rgba(18, 18, 20, 0.36)
+	) !important;
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	color: #eaeef8;
+	height: 50px;
+	display: flex;
+	align-items: center;
+	padding: 0 20px;
+}
+
+.headerContent {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+}
+
+.headerTitle {
+	font-size: 1.5rem;
+	font-weight: bold;
+	color: #000;
+	margin: 0;
+}
+
+.menuIconButton {
+	background: none;
+	border: none;
+	color: #000;
+	font-size: 1.5rem;
+	cursor: pointer;
+	padding: 8px 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+	transition: background-color 0.2s;
+}
+
+.menuIconButton:hover {
+	background-color: rgba(0, 0, 0, 0.1);
+}
+
+.menuIconButton:active {
+	background-color: rgba(0, 0, 0, 0.15);
+}
+
+.dropDown .dropdown-toggle {
+	color: black !important;
+}
+
+.diffArea {
+	background-color: #2e303c;
+}
