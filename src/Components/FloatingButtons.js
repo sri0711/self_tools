@@ -1,8 +1,8 @@
 import { useDispatch, useSelector } from 'react-redux';
-import EditModal from './EditModal';
 import { Button, Image } from 'react-bootstrap';
 import save from '../images/save.png';
 import { setJson1DiffData, setJson2DiffData } from '../redux/diffHandler';
+import { setJsonData } from '../redux/JsonHandler';
 
 function FloatingButtons({ onMenuClick }) {
 	let userSetting = useSelector((state) => state.user_settings.value);
@@ -11,7 +11,6 @@ function FloatingButtons({ onMenuClick }) {
 	const HandleValuePaste = async (e, buttonValue) => {
 		e.preventDefault();
 		let pastedData = await navigator.clipboard.readText();
-		console.log('🚀 ~ HandleValuePaste ~ buttonValue:', buttonValue);
 		let writeData = null;
 		try {
 			writeData = JSON.parse(pastedData);
@@ -25,11 +24,24 @@ function FloatingButtons({ onMenuClick }) {
 		);
 	};
 
+	const handlePasteValueForJsonEditor = async () => {
+		let pastedData = await navigator.clipboard.readText();
+		console.log(
+			'🚀 ~ handlePasteValueForJsonEditor ~ pastedData:',
+			pastedData
+		);
+		let writeData = null;
+		try {
+			writeData = JSON.parse(pastedData);
+		} catch {
+			writeData = pastedData;
+		}
+		Dispatch(setJsonData(writeData));
+	};
+
 	return (
 		<>
-			{userSetting.current_screen !== '/jsonDiff' && <EditModal />}
-
-			{userSetting.current_screen === '/jsonDiff' && (
+			{userSetting.current_screen === '/jsonDiff' ? (
 				<>
 					<Button
 						variant="dark"
@@ -54,6 +66,15 @@ function FloatingButtons({ onMenuClick }) {
 						/>
 					</Button>
 				</>
+			) : (
+				<Button
+					className="floatingMenuButton diffButton_2"
+					onClick={handlePasteValueForJsonEditor}
+					aria-label="Edit"
+					title="Edit"
+				>
+					<Image src={save} alt="Save" style={{ width: '20px' }} />
+				</Button>
 			)}
 
 			<button
