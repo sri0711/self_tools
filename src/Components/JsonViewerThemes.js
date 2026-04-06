@@ -1,4 +1,4 @@
-import { NavDropdown } from 'react-bootstrap';
+import { Dropdown } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { setJsonViewerTheme } from '../redux/userSettings';
 
@@ -50,27 +50,35 @@ function JsonViewerThemes() {
 	};
 
 	return (
-		<NavDropdown
-			title={userSettings.json_viewer_theme}
-			className="dropDown"
-			id="nav-dropdown"
-		>
-			{themes.map((theme) => {
-				if (theme === userSettings.json_viewer_theme) {
-					return null;
-				}
+		<div className="d-flex justify-content-start align-items-center gap-2 mx-3">
+			<p className="fw-bold text-black me-3 mt-2">Theme</p>
+			<Dropdown
+				title={userSettings.json_viewer_theme}
+				className="dropDown"
+				id="nav-dropdown"
+			>
+				<Dropdown.Toggle variant="light" id="dropdown-basic">
+					{userSettings.json_viewer_theme}
+				</Dropdown.Toggle>
+				<Dropdown.Menu className="dropDownMenu">
+					{themes.map((theme) => {
+						if (theme === userSettings.json_viewer_theme) {
+							return null;
+						}
 
-				return (
-					<NavDropdown.Item
-						key={theme}
-						value={theme}
-						onClick={() => handleThemeChange(theme)}
-					>
-						{theme}
-					</NavDropdown.Item>
-				);
-			})}
-		</NavDropdown>
+						return (
+							<Dropdown.Item
+								key={theme}
+								value={theme}
+								onClick={() => handleThemeChange(theme)}
+							>
+								{theme}
+							</Dropdown.Item>
+						);
+					})}
+				</Dropdown.Menu>
+			</Dropdown>
+		</div>
 	);
 }
 

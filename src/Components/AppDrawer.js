@@ -34,19 +34,21 @@ function AppDrawer({ show, onHide, onItemClick }) {
 			</Offcanvas.Header>
 			<Offcanvas.Body>
 				<Nav className="flex-column gap-2">
-					<Link to="/" className="nav-link" onClick={clickHandler}>
+					<Link
+						to="/"
+						className="nav-link text-black fw-bold"
+						onClick={clickHandler}
+					>
 						Json Viewer
 					</Link>
 					<Link
 						to="/jsonDiff"
-						className="nav-link"
+						className="nav-link text-black fw-bold"
 						onClick={clickHandler}
 					>
 						Json Diff Viewer
-					</Link>
-					<div className="mt-3">
-						<JsonViewerThemes />
-					</div>
+                    </Link>
+                    { userSettings.value.current_screen === '/' && <JsonViewerThemes /> }
 				</Nav>
 			</Offcanvas.Body>
 		</Offcanvas>

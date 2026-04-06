@@ -22,8 +22,8 @@ function JsonDiff() {
 				}}
 			>
 				<ReactDiffViewer
-					oldValue={JSON.stringify(diffValue1, null, 2)}
-					newValue={JSON.stringify(diffValue2, null, 2)}
+					oldValue={JSON.stringify(diffValue1, null, 3)}
+					newValue={JSON.stringify(diffValue2, null, 3)}
 					splitView={true}
 					useDarkTheme={true}
 					infiniteLoading={{
