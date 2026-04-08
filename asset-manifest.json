@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/sri000.github.io/self_tools/static/css/main.9b06514d.css",
+    "main.js": "/sri000.github.io/self_tools/static/js/main.30b15e5e.js",
+    "index.html": "/sri000.github.io/self_tools/index.html",
+    "main.9b06514d.css.map": "/sri000.github.io/self_tools/static/css/main.9b06514d.css.map",
+    "main.30b15e5e.js.map": "/sri000.github.io/self_tools/static/js/main.30b15e5e.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9b06514d.css",
+    "static/js/main.30b15e5e.js"
+  ]
+}
