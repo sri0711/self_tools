@@ -8,7 +8,8 @@ function AppDrawer({ show, onHide, onItemClick }) {
 	const Dispatch = useDispatch();
 	let availableScreens = {
 		'/': 'Editor',
-		'/jsonDiff': 'Json Diff'
+		'/jsonDiff': 'Json Diff',
+		'/dashboard': 'Dashboard'
 	};
 	const userSettings = useSelector((state) => {
 		return state.user_settings;
@@ -47,8 +48,19 @@ function AppDrawer({ show, onHide, onItemClick }) {
 						onClick={clickHandler}
 					>
 						Json Diff Viewer
-                    </Link>
-                    { userSettings.value.current_screen === '/' && <JsonViewerThemes /> }
+					</Link>
+
+					<Link
+						to="/dashboard"
+						className="nav-link text-black fw-bold"
+						onClick={clickHandler}
+					>
+						Json Table Dashboard
+					</Link>
+
+					{userSettings.value.current_screen === '/' && (
+						<JsonViewerThemes />
+					)}
 				</Nav>
 			</Offcanvas.Body>
 		</Offcanvas>

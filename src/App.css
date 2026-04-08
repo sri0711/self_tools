@@ -262,3 +262,22 @@
 	background-color: #6c6e70 !important;
 	border-color: #6c6e70 !important;
 }
+
+.dashboard {
+	background-color: #2e303c;
+	color: #ffffff;
+	min-height: 100vh;
+	min-width: 100vw;
+	padding: 10px;
+}
+
+.dashboard thead tr th {
+	background-color: #06630f !important;
+	color: #ffffff;
+	font-weight: 900;
+}
+
+.sort-btn {
+	color: #ffffff !important;
+	border: none !important;
+}

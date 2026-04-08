@@ -26,10 +26,6 @@ function FloatingButtons({ onMenuClick }) {
 
 	const handlePasteValueForJsonEditor = async () => {
 		let pastedData = await navigator.clipboard.readText();
-		console.log(
-			'🚀 ~ handlePasteValueForJsonEditor ~ pastedData:',
-			pastedData
-		);
 		let writeData = null;
 		try {
 			writeData = JSON.parse(pastedData);
@@ -41,7 +37,7 @@ function FloatingButtons({ onMenuClick }) {
 
 	return (
 		<>
-			{userSetting.current_screen === '/jsonDiff' ? (
+			{userSetting.current_screen === '/jsonDiff' && (
 				<>
 					<Button
 						variant="dark"
@@ -66,7 +62,8 @@ function FloatingButtons({ onMenuClick }) {
 						/>
 					</Button>
 				</>
-			) : (
+			)}
+			{userSetting.current_screen === '/' && (
 				<Button
 					className="floatingMenuButton diffButton_2"
 					onClick={handlePasteValueForJsonEditor}

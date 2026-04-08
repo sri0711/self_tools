@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import Home from './pages/Home';
 import AppDrawer from './Components/AppDrawer';
@@ -8,6 +8,7 @@ import FloatingButtons from './Components/FloatingButtons';
 import WhatsNewModal from './Components/WhatsNewModal';
 import JsonDiff from './pages/JsonDiff';
 import { useSelector } from 'react-redux';
+import DashBoard from './pages/DashBoard';
 
 function App() {
 	const [drawerOpen, setDrawerOpen] = useState(false);
@@ -63,6 +64,7 @@ function App() {
 				<Routes>
 					<Route path="/" element={<Home />} />
 					<Route path="/jsonDiff" element={<JsonDiff />} />
+					<Route path="/dashboard" element={<DashBoard />} />
 				</Routes>
 			</Container>
 		</Router>
