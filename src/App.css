@@ -179,6 +179,86 @@
 	white-space: nowrap;
 }
 
+.whatsNewBar {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	z-index: 999;
+}
+
+.versionBadge {
+	color: #fff;
+	padding: 6px 12px;
+	font-size: 0.85rem;
+}
+
+.whatsNewButton {
+	background-color: transparent;
+	color: #fff;
+	border: none;
+	border-radius: 15px;
+	padding: 10px 14px;
+	cursor: pointer;
+	font-size: 0.9rem;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+	transition:
+		transform 0.2s ease,
+		background-color 0.2s ease;
+}
+
+.whatsNewButton:hover {
+	transform: translateY(-1px);
+	background: rgba(255, 255, 255, 0.3);
+}
+
 .diffArea {
 	background-color: #2e303c;
+}
+/* Dark theme modal styles */
+.modal-content {
+	background-color: #2e303c !important;
+	color: #ffffff !important;
+	border: 1px solid #444 !important;
+}
+
+.modal-header {
+	background-color: #393e46 !important;
+	color: #ffffff !important;
+	border-bottom: 1px solid #444 !important;
+}
+
+.modal-header .btn-close {
+	filter: invert(1) !important;
+}
+
+.modal-body {
+	background-color: #2e303c !important;
+	color: #ffffff !important;
+}
+
+.modal-body ul {
+	color: #ffffff !important;
+}
+
+.modal-body li {
+	color: #ffffff !important;
+}
+
+.modal-footer {
+	background-color: #393e46 !important;
+	border-top: 1px solid #444 !important;
+}
+
+.modal-footer .btn {
+	background-color: #57595b !important;
+	border-color: #57595b !important;
+	color: #ffffff !important;
+}
+
+.modal-footer .btn:hover {
+	background-color: #6c6e70 !important;
+	border-color: #6c6e70 !important;
 }

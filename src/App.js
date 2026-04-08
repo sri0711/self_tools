@@ -5,6 +5,7 @@ import { Container } from 'react-bootstrap';
 import Home from './pages/Home';
 import AppDrawer from './Components/AppDrawer';
 import FloatingButtons from './Components/FloatingButtons';
+import WhatsNewModal from './Components/WhatsNewModal';
 import JsonDiff from './pages/JsonDiff';
 import { useSelector } from 'react-redux';
 
@@ -51,7 +52,7 @@ function App() {
 	return (
 		<Router>
 			<FloatingButtons onMenuClick={handleMenuClick} />
-
+			<WhatsNewModal />
 			<AppDrawer
 				show={drawerOpen}
 				onHide={() => setDrawerOpen(false)}
