@@ -6,19 +6,22 @@ import Home from './pages/Home';
 import AppDrawer from './Components/AppDrawer';
 import FloatingButtons from './Components/FloatingButtons';
 import JsonDiff from './pages/JsonDiff';
-
-function Settings() {
-	return (
-		<div>
-			<h2>Settings</h2>
-			<p>Use the navigation dropdown to explore additional routes.</p>
-		</div>
-	);
-}
+import { useSelector } from 'react-redux';
 
 function App() {
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const timeoutRef = useRef(null);
+
+	const basePath = window.location.href.split('#')[1];
+	const currentScreen = useSelector(
+		(state) => state.user_settings.value.current_screen
+	);
+	useEffect(() => {
+		if (currentScreen !== basePath) {
+			window.location.href =
+				window.location.href.split('#')[0] + '#' + currentScreen;
+		}
+	}, [basePath, currentScreen]);
 
 	useEffect(() => {
 		if (drawerOpen) {

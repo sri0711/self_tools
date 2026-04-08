@@ -6,9 +6,7 @@ function JsonDiff() {
 	let diffData = useSelector((state) => state.json_diff_data.value);
 	let [diffValue1, diffValue2] = [diffData.value1, diffData.value2];
 	return (
-		useEffect(() => {
-			console.log('Diff Data Updated:', diffData);
-		}, [diffData]),
+		useEffect(() => {}, [diffData]),
 		(
 			<div
 				className={'diffArea'}

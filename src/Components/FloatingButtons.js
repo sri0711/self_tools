@@ -3,6 +3,28 @@ import { Button, Image } from 'react-bootstrap';
 import save from '../images/save.png';
 import { setJson1DiffData, setJson2DiffData } from '../redux/diffHandler';
 import { setJsonData } from '../redux/JsonHandler';
+import packageJson from '../../package.json';
+import { useEffect } from 'react';
+
+let checkUpdate = async () => {
+	try {
+		let response = await fetch(
+			'https://api.github.com/repos/sri0711/self_tools/releases/latest'
+		);
+		let data = await response.json();
+		if (data.tag_name !== packageJson.version) {
+			if (
+				window.confirm(
+					'A new version of the app is available. Do you want to update?'
+				)
+			) {
+				window.open(data.html_url, '_blank');
+			}
+		}
+	} catch (error) {
+		console.error('Error checking for updates:', error);
+	}
+};
 
 function FloatingButtons({ onMenuClick }) {
 	let userSetting = useSelector((state) => state.user_settings.value);
