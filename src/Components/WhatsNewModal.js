@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
+import PackageJson from '../../package.json';
 
 let checkUpdate = async (setChanges, setVersion) => {
 	try {
+		if (
+			window.location.hostname === 'localhost' ||
+			window.location.hostname === '127.0.0.1'
+		) {
+			setVersion(`${PackageJson.version}-dev`);
+			setChanges('Running in development mode. No updates available.');
+			return;
+		}
 		let response = await fetch(
 			'https://api.github.com/repos/sri0711/self_tools/releases/latest'
 		);
@@ -11,7 +20,6 @@ let checkUpdate = async (setChanges, setVersion) => {
 		setVersion(latestVersion);
 		let changes = data.body;
 		setChanges(changes);
-		console.log('Changes:', changes);
 	} catch (error) {
 		console.error('Error checking for updates:', error);
 	}

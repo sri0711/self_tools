@@ -8,19 +8,20 @@ import FloatingButtons from './Components/FloatingButtons';
 import WhatsNewModal from './Components/WhatsNewModal';
 import JsonDiff from './pages/JsonDiff';
 import { useSelector } from 'react-redux';
+import DashBoard from './pages/DashBoard';
+import Formatter from './pages/Formatter';
 
 function App() {
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const timeoutRef = useRef(null);
 
-	const basePath = window.location.href.split('#')[1];
+	const basePath = window.location.pathname.replace('/self_tools', '') || '/';
 	const currentScreen = useSelector(
 		(state) => state.user_settings.value.current_screen
 	);
 	useEffect(() => {
 		if (currentScreen !== basePath) {
-			window.location.href =
-				window.location.href.split('#')[0] + '#' + currentScreen;
+			window.location.pathname = currentScreen;
 		}
 	}, [basePath, currentScreen]);
 
@@ -62,6 +63,8 @@ function App() {
 			<Container className="w-100 p-0 m-0">
 				<Routes>
 					<Route path="/" element={<Home />} />
+					<Route path="/dashboard" element={<DashBoard />} />
+					<Route path="/format" element={<Formatter />} />
 					<Route path="/jsonDiff" element={<JsonDiff />} />
 				</Routes>
 			</Container>

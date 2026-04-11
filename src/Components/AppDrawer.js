@@ -8,14 +8,18 @@ function AppDrawer({ show, onHide, onItemClick }) {
 	const Dispatch = useDispatch();
 	let availableScreens = {
 		'/': 'Editor',
-		'/jsonDiff': 'Json Diff'
+		'/jsonDiff': 'Json Diff',
+		'/dashboard': 'Dashboard',
+		'/format': 'Code Formatter'
 	};
 	const userSettings = useSelector((state) => {
 		return state.user_settings;
 	});
 
 	const clickHandler = (e) => {
-		Dispatch(setCurrentScreen(e.target.href.split('#')[1]));
+		let basePath =
+			new URL(e.target.href).pathname.replace('/self_tools', '') || '/';
+		Dispatch(setCurrentScreen(basePath));
 		onItemClick();
 	};
 	return (
@@ -47,8 +51,27 @@ function AppDrawer({ show, onHide, onItemClick }) {
 						onClick={clickHandler}
 					>
 						Json Diff Viewer
-                    </Link>
-                    { userSettings.value.current_screen === '/' && <JsonViewerThemes /> }
+					</Link>
+
+					<Link
+						to="/dashboard"
+						className="nav-link text-black fw-bold"
+						onClick={clickHandler}
+					>
+						Json Table Dashboard
+					</Link>
+
+					<Link
+						to="/format"
+						className="nav-link text-black fw-bold"
+						onClick={clickHandler}
+					>
+						Format Code
+					</Link>
+
+					{userSettings.value.current_screen === '/' && (
+						<JsonViewerThemes />
+					)}
 				</Nav>
 			</Offcanvas.Body>
 		</Offcanvas>
