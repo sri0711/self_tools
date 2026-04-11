@@ -9,7 +9,8 @@ function AppDrawer({ show, onHide, onItemClick }) {
 	let availableScreens = {
 		'/': 'Editor',
 		'/jsonDiff': 'Json Diff',
-		'/dashboard': 'Dashboard'
+		'/dashboard': 'Dashboard',
+		'/format': 'Code Formatter'
 	};
 	const userSettings = useSelector((state) => {
 		return state.user_settings;
@@ -58,6 +59,14 @@ function AppDrawer({ show, onHide, onItemClick }) {
 						onClick={clickHandler}
 					>
 						Json Table Dashboard
+					</Link>
+
+					<Link
+						to="/format"
+						className="nav-link text-black fw-bold"
+						onClick={clickHandler}
+					>
+						Format Code
 					</Link>
 
 					{userSettings.value.current_screen === '/' && (

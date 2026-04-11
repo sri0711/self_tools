@@ -1,19 +1,20 @@
 {
 	"homepage": "https://sri0711.github.io/self_tools",
 	"name": "self_tools",
-	"version": "0.1.0",
+	"version": "1.1.0",
 	"private": true,
 	"dependencies": {
-		"@microlink/react-json-view": "^1.31.16",
+		"@microlink/react-json-view": "^1.31.18",
 		"@reduxjs/toolkit": "^2.11.2",
 		"bootstrap": "^5.3.8",
 		"react": "^19.2.4",
 		"react-bootstrap": "^2.9.0",
 		"react-diff-viewer-continued": "^4.2.0",
-		"react-dom": "^19.2.4",
+		"react-dom": "^19.2.5",
 		"react-redux": "^9.2.0",
 		"react-router-dom": "^7.14.0",
 		"react-scripts": "5.0.1",
+		"xlsx": "^0.18.5",
 		"redux": "^5.0.1"
 	},
 	"scripts": {

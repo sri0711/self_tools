@@ -3,6 +3,7 @@ import { Button, Image } from 'react-bootstrap';
 import save from '../images/save.png';
 import { setJson1DiffData, setJson2DiffData } from '../redux/diffHandler';
 import { setJsonData } from '../redux/JsonHandler';
+import { setFileHandlerModal } from '../redux/userSettings';
 
 function FloatingButtons({ onMenuClick }) {
 	let userSetting = useSelector((state) => state.user_settings.value);
@@ -33,6 +34,10 @@ function FloatingButtons({ onMenuClick }) {
 			writeData = pastedData;
 		}
 		Dispatch(setJsonData(writeData));
+	};
+
+	const openFileHandlerModal = () => {
+		Dispatch(setFileHandlerModal());
 	};
 
 	return (
@@ -71,6 +76,17 @@ function FloatingButtons({ onMenuClick }) {
 					title="Edit"
 				>
 					<Image src={save} alt="Save" style={{ width: '20px' }} />
+				</Button>
+			)}
+
+			{userSetting.current_screen === '/dashboard' && (
+				<Button
+					className="floatingMenuButton diffButton_2"
+					onClick={openFileHandlerModal}
+					aria-label="Edit"
+					title="Edit"
+				>
+					<h2>📝</h2>
 				</Button>
 			)}
 

@@ -86,7 +86,7 @@ function createFilter() {
 }
 
 // ---------------- COMPONENT ----------------
-function DynamicFilter({ data, onFiltered }) {
+function DynamicFilter({ data, onFiltered, filteredData }) {
 	const [filters, setFilters] = useState([createFilter()]);
 
 	const fieldMeta = useMemo(() => getFieldMeta(data), [data]);
@@ -391,6 +391,32 @@ function DynamicFilter({ data, onFiltered }) {
 		);
 	};
 
+	const ExportHandle = () => {
+		const data = filteredData;
+		if (!data || !data.length) {
+			return;
+		}
+		let headers = Object.keys(data[0]);
+		headers = headers.map((header) => `"${header}"`);
+		let csvString = headers.join(',') + '\n';
+
+		data.forEach((row) => {
+			const values = headers.map((header) => {
+				const key = header.replace(/"/g, '');
+				const value = row[key] != null ? String(row[key]) : '';
+				return `"${value.replace(/"/g, '""')}"`;
+			});
+			csvString += values.join(',') + '\n';
+		});
+		const link = document.createElement('a');
+		link.href =
+			'data:text/csv;charset=utf-8,' + encodeURIComponent(csvString);
+		link.download = 'filtered_data.csv';
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+	};
+
 	return (
 		<div className="dynamic-filter mb-4 p-3 rounded bg-secondary bg-opacity-10">
 			<div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-start gap-2 mb-3">
@@ -399,6 +425,9 @@ function DynamicFilter({ data, onFiltered }) {
 				</div>
 				<Button size="sm" onClick={addFilter} variant="success">
 					Add filter
+				</Button>
+				<Button size="sm" onClick={ExportHandle} variant="success">
+					Export
 				</Button>
 			</div>
 
