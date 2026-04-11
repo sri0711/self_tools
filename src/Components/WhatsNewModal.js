@@ -11,7 +11,6 @@ let checkUpdate = async (setChanges, setVersion) => {
 		setVersion(latestVersion);
 		let changes = data.body;
 		setChanges(changes);
-		console.log('Changes:', changes);
 	} catch (error) {
 		console.error('Error checking for updates:', error);
 	}

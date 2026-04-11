@@ -16,7 +16,9 @@ function AppDrawer({ show, onHide, onItemClick }) {
 	});
 
 	const clickHandler = (e) => {
-		Dispatch(setCurrentScreen(e.target.href.split('#')[1]));
+		let basePath =
+			new URL(e.target.href).pathname.replace('/self_tools', '') || '/';
+		Dispatch(setCurrentScreen(basePath));
 		onItemClick();
 	};
 	return (

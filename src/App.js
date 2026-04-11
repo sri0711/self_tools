@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 import Home from './pages/Home';
 import AppDrawer from './Components/AppDrawer';
@@ -14,14 +14,19 @@ function App() {
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const timeoutRef = useRef(null);
 
-	const basePath = window.location.href.split('#')[1];
+	const basePath = window.location.pathname.replace('/self_tools', '') || '/';
 	const currentScreen = useSelector(
 		(state) => state.user_settings.value.current_screen
 	);
 	useEffect(() => {
 		if (currentScreen !== basePath) {
-			window.location.href =
-				window.location.href.split('#')[0] + '#' + currentScreen;
+			window.location.pathname = currentScreen;
+			console.log(
+				'Current screen from Redux:',
+				currentScreen,
+				'Base path:',
+				basePath
+			);
 		}
 	}, [basePath, currentScreen]);
 
