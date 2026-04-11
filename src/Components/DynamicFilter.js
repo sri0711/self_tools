@@ -1,41 +1,62 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Col, Form, Row } from 'react-bootstrap';
 
-const MAX_TOGGLE_OPTIONS = 5;
-const MAX_DROPDOWN_OPTIONS = 10;
+const MAX_TOGGLE_OPTIONS = 7;
+const MAX_DROPDOWN_OPTIONS = 15;
 
+// ---------------- META ----------------
 function getFieldMeta(data) {
 	const meta = {};
 	if (!data || !data.length) return meta;
 
 	const fields = Object.keys(data[0]);
+
 	fields.forEach((field) => {
-		const values = data.map((row) => row[field]).filter((v) => v != null);
-		const stringValues = values.map((value) => String(value));
-		const uniqueValues = [...new Set(stringValues)];
+		const uniqueSet = new Set();
+		let allNumbers = true;
+		let allDates = true;
 
-		const allNumbers = values.every((value) => {
-			const num = parseFloat(value);
-			return value !== '' && !Number.isNaN(num) && Number.isFinite(num);
-		});
+		for (let i = 0; i < data.length; i++) {
+			const value = data[i][field];
+			if (value == null) continue;
 
-		const allDates = values.every((value) => {
-			const time = Date.parse(String(value));
-			return !Number.isNaN(time);
-		});
+			const str = String(value);
+			uniqueSet.add(str);
+
+			if (allNumbers) {
+				const num = parseFloat(value);
+				if (
+					value === '' ||
+					Number.isNaN(num) ||
+					!Number.isFinite(num)
+				) {
+					allNumbers = false;
+				}
+			}
+
+			if (allDates) {
+				if (Number.isNaN(Date.parse(str))) {
+					allDates = false;
+				}
+			}
+
+			if (
+				!allNumbers &&
+				!allDates &&
+				uniqueSet.size > MAX_DROPDOWN_OPTIONS
+			) {
+				break; // early exit
+			}
+		}
+
+		const uniqueValues = Array.from(uniqueSet);
 
 		let type = 'text';
-		if (allNumbers) {
-			type = 'number';
-		} else if (allDates) {
-			type = 'date';
-		} else if (uniqueValues.length <= MAX_TOGGLE_OPTIONS) {
-			type = 'toggle';
-		} else if (uniqueValues.length <= MAX_DROPDOWN_OPTIONS) {
-			type = 'dropdown';
-		} else {
-			type = 'dropdown-unsupported';
-		}
+		if (allNumbers) type = 'number';
+		else if (allDates) type = 'date';
+		else if (uniqueValues.length <= MAX_TOGGLE_OPTIONS) type = 'toggle';
+		else if (uniqueValues.length <= MAX_DROPDOWN_OPTIONS) type = 'dropdown';
+		else type = 'dropdown-unsupported';
 
 		meta[field] = {
 			values: uniqueValues,
@@ -47,9 +68,10 @@ function getFieldMeta(data) {
 	return meta;
 }
 
+// ---------------- FILTER FACTORY ----------------
 function createFilter() {
 	return {
-		id: Date.now(),
+		id: Date.now() + Math.random(),
 		field: '',
 		type: 'text',
 		operator: 'and',
@@ -63,92 +85,111 @@ function createFilter() {
 	};
 }
 
+// ---------------- COMPONENT ----------------
 function DynamicFilter({ data, onFiltered }) {
 	const [filters, setFilters] = useState([createFilter()]);
 
 	const fieldMeta = useMemo(() => getFieldMeta(data), [data]);
 
 	useEffect(() => {
+		if (!onFiltered) return;
+
+		// ✅ preprocess filters ONCE
+		const preparedFilters = filters.map((f) => ({
+			...f,
+			textLower: f.text.trim().toLowerCase(),
+			numberMinNum: f.numberMin !== '' ? Number(f.numberMin) : null,
+			numberMaxNum: f.numberMax !== '' ? Number(f.numberMax) : null,
+			dateFromNum: f.dateFrom ? Date.parse(f.dateFrom) : null,
+			dateToNum: f.dateTo ? Date.parse(f.dateTo) : null
+		}));
+
 		const evaluateFilter = (filter, row) => {
 			if (!filter.field) return true;
+
 			const meta = fieldMeta[filter.field];
 			if (!meta) return true;
 
 			const rawValue = row[filter.field];
 			const value = rawValue != null ? rawValue : '';
 
+			// NUMBER
 			if (filter.type === 'number') {
 				const num = parseFloat(value);
 				if (Number.isNaN(num)) return false;
-				if (filter.numberMin !== '' && num < Number(filter.numberMin))
+
+				if (filter.numberMinNum !== null && num < filter.numberMinNum)
 					return false;
-				if (filter.numberMax !== '' && num > Number(filter.numberMax))
+				if (filter.numberMaxNum !== null && num > filter.numberMaxNum)
 					return false;
+
 				return true;
 			}
 
+			// DATE
 			if (filter.type === 'date') {
 				const dateValue = Date.parse(String(value));
 				if (Number.isNaN(dateValue)) return false;
-				if (filter.dateFrom) {
-					const from = Date.parse(filter.dateFrom);
-					if (dateValue < from) return false;
-				}
-				if (filter.dateTo) {
-					const to = Date.parse(filter.dateTo);
-					if (dateValue > to) return false;
-				}
+
+				if (filter.dateFromNum && dateValue < filter.dateFromNum)
+					return false;
+				if (filter.dateToNum && dateValue > filter.dateToNum)
+					return false;
+
 				return true;
 			}
 
+			// DROPDOWN
 			if (filter.type === 'dropdown') {
 				if (meta.count > MAX_DROPDOWN_OPTIONS) {
-					if (filter.text.trim() === '') return true;
+					if (!filter.textLower) return true;
+
 					return String(value)
 						.toLowerCase()
-						.includes(filter.text.trim().toLowerCase());
+						.includes(filter.textLower);
 				}
 
 				if (!filter.dropdown) return true;
 				return String(value) === String(filter.dropdown);
 			}
 
+			// TOGGLE
 			if (filter.type === 'toggle') {
 				if (meta.count > MAX_TOGGLE_OPTIONS) {
-					if (filter.text.trim() === '') return true;
+					if (!filter.textLower) return true;
+
 					return String(value)
 						.toLowerCase()
-						.includes(filter.text.trim().toLowerCase());
+						.includes(filter.textLower);
 				}
 
 				if (!filter.toggleValues.length) return true;
+
 				if (Array.isArray(value)) {
 					return value.some((item) =>
 						filter.toggleValues.includes(String(item))
 					);
 				}
+
 				return filter.toggleValues.includes(String(value));
 			}
 
-			if (filter.text.trim() === '') return true;
-			return String(value)
-				.toLowerCase()
-				.includes(filter.text.trim().toLowerCase());
+			// TEXT
+			if (!filter.textLower) return true;
+
+			return String(value).toLowerCase().includes(filter.textLower);
 		};
 
-		if (!onFiltered) return;
-
 		const filtered = data.filter((row) => {
-			if (!filters.length) return true;
+			if (!preparedFilters.length) return true;
 
-			let result = evaluateFilter(filters[0], row);
-			for (let index = 1; index < filters.length; index += 1) {
-				const filter = filters[index];
-				const nextResult = evaluateFilter(filter, row);
-				result =
-					filter.operator === 'or'
-						? result || nextResult
-						: result && nextResult;
+			let result = evaluateFilter(preparedFilters[0], row);
+
+			for (let i = 1; i < preparedFilters.length; i++) {
+				const f = preparedFilters[i];
+				const next = evaluateFilter(f, row);
+
+				result = f.operator === 'or' ? result || next : result && next;
 			}
 
 			return result;
@@ -175,9 +216,7 @@ function DynamicFilter({ data, onFiltered }) {
 
 	const renderFilterInput = (filter) => {
 		const meta = filter.field ? fieldMeta[filter.field] : null;
-		if (!filter.field) {
-			return <></>;
-		}
+		if (!filter.field) return <></>;
 
 		if (!meta) {
 			return (
@@ -327,6 +366,7 @@ function DynamicFilter({ data, onFiltered }) {
 											(item) => item !== value
 										)
 									: [...filter.toggleValues, value];
+
 								updateFilter(filter.id, {
 									toggleValues: nextValues
 								});
@@ -395,6 +435,7 @@ function DynamicFilter({ data, onFiltered }) {
 								</Form.Select>
 							</Form.Group>
 						</Col>
+
 						<Col md={2}>
 							<Form.Group>
 								<Form.Label>Type</Form.Label>
@@ -413,19 +454,23 @@ function DynamicFilter({ data, onFiltered }) {
 										})
 									}
 								>
-									<option value="text">Text</option>
-									<option value="number">Number</option>
-									<option value="date">Date</option>
-									<option value="dropdown">Dropdown</option>
+									<option value="text">Fuzzy Search</option>
+									<option value="number">Number Range</option>
+									<option value="date">Date Between</option>
+									<option value="dropdown">
+										Pick Option
+									</option>
 									<option value="toggle">Toggle</option>
 								</Form.Select>
 							</Form.Group>
 						</Col>
+
 						<Col md={4}>{renderFilterInput(filter)}</Col>
+
 						<Col md={3} className="d-flex flex-column gap-2">
 							{index > 0 && (
 								<Form.Group>
-									<Form.Label>Join</Form.Label>
+									<Form.Label>Join With</Form.Label>
 									<Form.Select
 										value={filter.operator}
 										onChange={(e) =>
@@ -439,6 +484,7 @@ function DynamicFilter({ data, onFiltered }) {
 									</Form.Select>
 								</Form.Group>
 							)}
+
 							<Button
 								variant="danger"
 								size="sm"
