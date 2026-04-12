@@ -17,9 +17,10 @@ function AppDrawer({ show, onHide, onItemClick }) {
 	});
 
 	const clickHandler = (e) => {
-		let basePath =
-			new URL(e.target.href).pathname.replace('/self_tools', '') || '/';
-		Dispatch(setCurrentScreen(basePath));
+		const linkUrl = new URL(e.currentTarget.href);
+		const hash = linkUrl.hash || '#/';
+		const routePath = hash.startsWith('#') ? hash.slice(1) : hash;
+		Dispatch(setCurrentScreen(routePath));
 		onItemClick();
 	};
 	return (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import AppDrawer from './Components/AppDrawer';
 import FloatingButtons from './Components/FloatingButtons';
@@ -14,13 +14,14 @@ function App() {
 	const [drawerOpen, setDrawerOpen] = useState(false);
 	const timeoutRef = useRef(null);
 
-	const basePath = window.location.pathname.replace('/self_tools', '') || '/';
+	const rawHash = window.location.hash || '#/';
+	const basePath = rawHash.startsWith('#') ? rawHash.slice(1) : rawHash;
 	const currentScreen = useSelector(
 		(state) => state.user_settings.value.current_screen
 	);
 	useEffect(() => {
 		if (currentScreen !== basePath) {
-			window.location.pathname = currentScreen;
+			window.location.hash = currentScreen;
 		}
 	}, [basePath, currentScreen]);
 
