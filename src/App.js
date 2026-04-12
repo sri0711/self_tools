@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Container } from 'react-bootstrap';
 import Home from './pages/Home';
 import AppDrawer from './Components/AppDrawer';
 import FloatingButtons from './Components/FloatingButtons';
@@ -60,14 +59,14 @@ function App() {
 				onItemClick={handleDrawerItemClick}
 			/>
 
-			<Container className="w-100 p-0 m-0">
+			<div className="vw-100 p-0 m-0">
 				<Routes>
 					<Route path="/" element={<Home />} />
 					<Route path="/dashboard" element={<DashBoard />} />
 					<Route path="/format" element={<Formatter />} />
 					<Route path="/jsonDiff" element={<JsonDiff />} />
 				</Routes>
-			</Container>
+			</div>
 		</Router>
 	);
 }

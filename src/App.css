@@ -193,10 +193,12 @@
 	color: #fff;
 	padding: 6px 12px;
 	font-size: 0.85rem;
+	background-color: rgba(0, 0, 0, 0.4);
+	border-radius: 15px;
 }
 
 .whatsNewButton {
-	background-color: transparent;
+	background-color: rgba(0, 0, 0, 0.4);
 	color: #fff;
 	border: none;
 	border-radius: 15px;
