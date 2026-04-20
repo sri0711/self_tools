@@ -68,7 +68,7 @@ function FloatingButtons({ onMenuClick }) {
 					</Button>
 				</>
 			)}
-			{userSetting.current_screen === '/' && (
+			{userSetting.current_screen === '/viewer' && (
 				<Button
 					className="floatingMenuButton diffButton_2"
 					onClick={handlePasteValueForJsonEditor}
@@ -90,14 +90,16 @@ function FloatingButtons({ onMenuClick }) {
 				</Button>
 			)}
 
-			<button
-				className="floatingMenuButton"
-				onClick={onMenuClick}
-				aria-label="Open menu"
-				title="Open menu"
-			>
-				☰
-			</button>
+			{userSetting.current_screen !== '/' && (
+				<button
+					className="floatingMenuButton"
+					onClick={onMenuClick}
+					aria-label="Open menu"
+					title="Open menu"
+				>
+					☰
+				</button>
+			)}
 		</>
 	);
 }

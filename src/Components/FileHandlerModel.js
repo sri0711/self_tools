@@ -1,9 +1,18 @@
 import React, { useMemo, useState } from 'react';
-import { Modal, Button, Form, Alert, Spinner } from 'react-bootstrap';
+import {
+	Modal,
+	Button,
+	Form,
+	Alert,
+	Spinner,
+	ProgressBar
+} from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { setFileHandlerModal } from '../redux/userSettings';
 import * as XLSX from 'xlsx';
 import { setDashboardData } from '../redux/dashBoardHandler';
+import { storeLargeData, storeChunkedData } from '../Tools/clientDatabase';
+import Papa from 'papaparse';
 
 function FileHandlerModel() {
 	const userSetting = useSelector((state) => state.user_settings.value);
@@ -15,6 +24,8 @@ function FileHandlerModel() {
 	const [previewOpen, setPreviewOpen] = useState(false);
 	const [error, setError] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [progress, setProgress] = useState(0);
+	const [statusText, setStatusText] = useState('');
 
 	const acceptedExtensions = '.xls,.xlsx,.csv,.ods';
 
@@ -25,6 +36,8 @@ function FileHandlerModel() {
 		setPreviewOpen(false);
 		setError('');
 		setLoading(false);
+		setProgress(0);
+		setStatusText('');
 	};
 
 	const closeModal = () => {
@@ -56,23 +69,85 @@ function FileHandlerModel() {
 
 		setFile(selected);
 		setLoading(true);
+		setProgress(0);
+		setStatusText('Parsing file...');
+
+		// Yield control back to the browser so the loading spinner can render
+		await new Promise((resolve) => setTimeout(resolve, 50));
 
 		try {
-			const arrayBuffer = await selected.arrayBuffer();
-			const workbook = XLSX.read(arrayBuffer, {
-				type: 'array',
-				cellDates: true
-			});
+			let sheets = {};
+			let defaultSheetName = '';
 
-			const sheets = workbook.SheetNames.reduce((acc, name) => {
-				acc[name] = XLSX.utils.sheet_to_json(workbook.Sheets[name], {
-					defval: null
+			if (normalizedName.endsWith('.csv')) {
+				setStatusText('Parsing CSV in background worker...');
+				sheets = await new Promise((resolve, reject) => {
+					let accumulatedData = [];
+					Papa.parse(selected, {
+						header: true,
+						skipEmptyLines: true,
+						worker: true, // Prevents UI freeze by moving to background thread
+						chunk: (results) => {
+							// Push iteratively to prevent call stack size limit errors on massive chunks
+							for (let i = 0; i < results.data.length; i++) {
+								accumulatedData.push(results.data[i]);
+							}
+							if (selected.size > 0) {
+								const percent = Math.round(
+									(results.meta.cursor / selected.size) * 100
+								);
+								setProgress(percent);
+							}
+						},
+						error: reject,
+						complete: () => {
+							setProgress(100);
+							resolve({ [selected.name]: accumulatedData });
+						}
+					});
 				});
-				return acc;
-			}, {});
+				defaultSheetName = selected.name;
+			} else {
+				setStatusText('Reading Spreadsheet File...');
+				const arrayBuffer = await new Promise((resolve, reject) => {
+					const reader = new FileReader();
+					reader.onprogress = (event) => {
+						if (event.lengthComputable) {
+							setProgress(
+								Math.round((event.loaded / event.total) * 50)
+							);
+						}
+					};
+					reader.onload = (e) => resolve(e.target.result);
+					reader.onerror = reject;
+					reader.readAsArrayBuffer(selected);
+				});
+
+				setStatusText('Parsing Spreadsheet Data...');
+				setProgress(75);
+				await new Promise((resolve) => setTimeout(resolve, 50));
+
+				const data = new Uint8Array(arrayBuffer);
+				const workbook = XLSX.read(data, {
+					type: 'array',
+					cellDates: true
+				});
+
+				sheets = workbook.SheetNames.reduce((acc, name) => {
+					acc[name] = XLSX.utils.sheet_to_json(
+						workbook.Sheets[name],
+						{
+							defval: null
+						}
+					);
+					return acc;
+				}, {});
+				setProgress(100);
+				defaultSheetName = workbook.SheetNames[0] || '';
+			}
 
 			setParsedData(sheets);
-			setSelectedSheet(workbook.SheetNames[0] || '');
+			setSelectedSheet(defaultSheetName);
 			console.log('Parsed file JSON', sheets);
 		} catch (err) {
 			console.error('File parse error:', err);
@@ -86,13 +161,49 @@ function FileHandlerModel() {
 
 	const previewJson = useMemo(() => {
 		if (!parsedData || !selectedSheet) return '';
-		return JSON.stringify(parsedData[selectedSheet], null, 2);
+
+		const data = parsedData[selectedSheet];
+		const isArray = Array.isArray(data);
+		const previewLimit = 100;
+
+		// Render only the first 50 rows to prevent the browser from crashing (Aw, Snap!)
+		const previewData = isArray ? data.slice(0, previewLimit) : data;
+		const jsonString = JSON.stringify(previewData, null, 2);
+
+		return isArray && data.length > previewLimit
+			? `${jsonString}\n\n... and ${data.length - previewLimit} more rows (truncated for preview to prevent browser crash)`
+			: jsonString;
 	}, [parsedData, selectedSheet]);
 
-	const HandleDataImport = () => {
+	const HandleDataImport = async () => {
 		if (!parsedData || !selectedSheet) return;
+
+		setLoading(true);
+		setStatusText('Storing data to browser database...');
+		setProgress(0);
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
 		const dataToImport = parsedData[selectedSheet];
-		Dispatch(setDashboardData(dataToImport));
+		const isArray = Array.isArray(dataToImport);
+
+		// Store in IndexedDB to avoid Redux crashing on huge payloads
+		if (isArray) {
+			await storeChunkedData(
+				'dashboard_active_sheet',
+				dataToImport,
+				setProgress
+			);
+		} else {
+			await storeLargeData('dashboard_active_sheet', dataToImport);
+		}
+
+		Dispatch(
+			setDashboardData({
+				isLarge: true,
+				totalRows: isArray ? dataToImport.length : 1,
+				timestamp: Date.now()
+			})
+		);
 		closeModal();
 	};
 
@@ -112,7 +223,18 @@ function FileHandlerModel() {
 			return;
 		}
 
-		Dispatch(setDashboardData(writeData));
+		const dataArr = Array.isArray(writeData) ? writeData : [writeData];
+		setLoading(true);
+		setStatusText('Pasting to database...');
+		setProgress(0);
+		await storeChunkedData('dashboard_active_sheet', dataArr, setProgress);
+		Dispatch(
+			setDashboardData({
+				isLarge: true,
+				totalRows: dataArr.length,
+				timestamp: Date.now()
+			})
+		);
 		closeModal();
 	};
 
@@ -145,9 +267,21 @@ function FileHandlerModel() {
 				)}
 
 				{loading && (
-					<div className="mb-3 d-flex align-items-center gap-2">
-						<Spinner animation="border" size="sm" />
-						<span>Parsing file...</span>
+					<div className="mb-3">
+						<div className="d-flex align-items-center gap-2 mb-2">
+							<Spinner animation="border" size="sm" />
+							<span>{statusText || 'Processing...'}</span>
+						</div>
+						{progress > 0 && (
+							<ProgressBar
+								variant="success"
+								striped
+								animated
+								now={progress}
+								label={`${progress}%`}
+								style={{ height: '24px', borderRadius: '12px', fontWeight: 'bold', fontSize: '14px' }}
+							/>
+						)}
 					</div>
 				)}
 

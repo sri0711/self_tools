@@ -1,8 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Button, Col, Form, Row } from 'react-bootstrap';
+import { Button, Col, Form, Row, ProgressBar, Dropdown } from 'react-bootstrap';
+import {
+	getDatabaseMeta,
+	getDbChunk,
+	writeDbChunk,
+	writeDbMeta
+} from '../Tools/clientDatabase';
 
 const MAX_TOGGLE_OPTIONS = 7;
 const MAX_DROPDOWN_OPTIONS = 15;
+const MAX_SEARCHABLE_OPTIONS = 1000;
 
 // ---------------- META ----------------
 function getFieldMeta(data) {
@@ -11,12 +18,15 @@ function getFieldMeta(data) {
 
 	const fields = Object.keys(data[0]);
 
+	// Sample limit to prevent UI freeze on huge datasets
+	const sampleSize = Math.min(data.length, 5000);
+
 	fields.forEach((field) => {
 		const uniqueSet = new Set();
 		let allNumbers = true;
 		let allDates = true;
 
-		for (let i = 0; i < data.length; i++) {
+		for (let i = 0; i < sampleSize; i++) {
 			const value = data[i][field];
 			if (value == null) continue;
 
@@ -43,7 +53,7 @@ function getFieldMeta(data) {
 			if (
 				!allNumbers &&
 				!allDates &&
-				uniqueSet.size > MAX_DROPDOWN_OPTIONS
+				uniqueSet.size > MAX_SEARCHABLE_OPTIONS
 			) {
 				break; // early exit
 			}
@@ -55,7 +65,8 @@ function getFieldMeta(data) {
 		if (allNumbers) type = 'number';
 		else if (allDates) type = 'date';
 		else if (uniqueValues.length <= MAX_TOGGLE_OPTIONS) type = 'toggle';
-		else if (uniqueValues.length <= MAX_DROPDOWN_OPTIONS) type = 'dropdown';
+		else if (uniqueValues.length <= MAX_SEARCHABLE_OPTIONS)
+			type = 'dropdown';
 		else type = 'dropdown-unsupported';
 
 		meta[field] = {
@@ -81,18 +92,28 @@ function createFilter() {
 		dateFrom: '',
 		dateTo: '',
 		dropdown: '',
+		dropdownSearch: '',
 		toggleValues: []
 	};
 }
 
 // ---------------- COMPONENT ----------------
-function DynamicFilter({ data, onFiltered, filteredData }) {
+function DynamicFilter({
+	data,
+	onFiltered,
+	filteredData,
+	dbBaseId,
+	isDbPaginated
+}) {
 	const [filters, setFilters] = useState([createFilter()]);
+	const [isFiltering, setIsFiltering] = useState(false);
+	const [filterProgress, setFilterProgress] = useState(0);
+	const [exportProgress, setExportProgress] = useState(0);
 
 	const fieldMeta = useMemo(() => getFieldMeta(data), [data]);
 
 	useEffect(() => {
-		if (!onFiltered) return;
+		if (!onFiltered || !data) return;
 
 		// ✅ preprocess filters ONCE
 		const preparedFilters = filters.map((f) => ({
@@ -141,7 +162,7 @@ function DynamicFilter({ data, onFiltered, filteredData }) {
 
 			// DROPDOWN
 			if (filter.type === 'dropdown') {
-				if (meta.count > MAX_DROPDOWN_OPTIONS) {
+				if (meta.count > MAX_SEARCHABLE_OPTIONS) {
 					if (!filter.textLower) return true;
 
 					return String(value)
@@ -180,23 +201,145 @@ function DynamicFilter({ data, onFiltered, filteredData }) {
 			return String(value).toLowerCase().includes(filter.textLower);
 		};
 
-		const filtered = data.filter((row) => {
-			if (!preparedFilters.length) return true;
+		// ✅ Check if any filters are active. If none, bypass processing immediately
+		const hasActiveFilters = preparedFilters.some((f) => f.field);
 
-			let result = evaluateFilter(preparedFilters[0], row);
+		if (!hasActiveFilters) {
+			onFiltered(data, false);
+			setIsFiltering(false);
+			setFilterProgress(0);
+			return;
+		}
 
-			for (let i = 1; i < preparedFilters.length; i++) {
-				const f = preparedFilters[i];
-				const next = evaluateFilter(f, row);
+		setIsFiltering(true);
+		let isCancelled = false;
 
-				result = f.operator === 'or' ? result || next : result && next;
+		const processFiltering = async () => {
+			const CHUNK_SIZE = 10000;
+
+			if (isDbPaginated && dbBaseId) {
+				const FILTER_BASE_ID = 'dashboard_filtered_sheet';
+				let chunkIndex = 0;
+				let buffer = [];
+				let totalFiltered = 0;
+
+				const flushBuffer = async (force = false) => {
+					while (buffer.length >= 20000) {
+						const chunkData = buffer.slice(0, 20000);
+						buffer = buffer.slice(20000);
+						await writeDbChunk(
+							FILTER_BASE_ID,
+							chunkIndex,
+							chunkData
+						);
+						chunkIndex++;
+					}
+					if (force && buffer.length > 0) {
+						await writeDbChunk(FILTER_BASE_ID, chunkIndex, buffer);
+						chunkIndex++;
+						buffer = [];
+					}
+				};
+
+				const meta = await getDatabaseMeta(dbBaseId);
+				if (meta && meta.chunks) {
+					for (let i = 0; i < meta.chunks; i++) {
+						if (isCancelled) return;
+						const chunk = await getDbChunk(dbBaseId, i);
+						const filteredChunk = chunk.filter((row) => {
+							let result = evaluateFilter(
+								preparedFilters[0],
+								row
+							);
+							for (let j = 1; j < preparedFilters.length; j++) {
+								const f = preparedFilters[j];
+								const next = evaluateFilter(f, row);
+								result =
+									f.operator === 'or'
+										? result || next
+										: result && next;
+							}
+							return result;
+						});
+
+						buffer.push(...filteredChunk);
+						totalFiltered += filteredChunk.length;
+						await flushBuffer();
+
+						await new Promise((resolve) => setTimeout(resolve, 0));
+						setFilterProgress(
+							Math.round(((i + 1) / meta.chunks) * 100)
+						);
+					}
+
+					if (isCancelled) return;
+					await flushBuffer(true);
+					await writeDbMeta(
+						FILTER_BASE_ID,
+						chunkIndex,
+						totalFiltered
+					);
+
+					if (!isCancelled) {
+						onFiltered(
+							{
+								isDb: true,
+								baseId: FILTER_BASE_ID,
+								totalRows: totalFiltered
+							},
+							true
+						);
+						setIsFiltering(false);
+						setFilterProgress(0);
+					}
+				}
+			} else {
+				let resultArr = [];
+				for (let i = 0; i < data.length; i += CHUNK_SIZE) {
+					if (isCancelled) return; // Prevent overlapping runs if user keeps typing
+
+					const chunk = data.slice(i, i + CHUNK_SIZE);
+					const filteredChunk = chunk.filter((row) => {
+						let result = evaluateFilter(preparedFilters[0], row);
+
+						for (let j = 1; j < preparedFilters.length; j++) {
+							const f = preparedFilters[j];
+							const next = evaluateFilter(f, row);
+							result =
+								f.operator === 'or'
+									? result || next
+									: result && next;
+						}
+						return result;
+					});
+
+					resultArr.push(...filteredChunk);
+					// Yield to the browser event loop to prevent "Aw Snap!" crash
+					await new Promise((resolve) => setTimeout(resolve, 0));
+					setFilterProgress(
+						Math.round(
+							(Math.min(i + CHUNK_SIZE, data.length) /
+								data.length) *
+								100
+						)
+					);
+				}
+
+				if (!isCancelled) {
+					onFiltered(resultArr, true);
+					setIsFiltering(false);
+					setFilterProgress(0);
+				}
 			}
+		};
 
-			return result;
-		});
+		processFiltering();
 
-		onFiltered(filtered);
-	}, [data, filters, fieldMeta, onFiltered]);
+		return () => {
+			isCancelled = true;
+			setFilterProgress(0);
+		};
+	}, [data, filters, fieldMeta, onFiltered, dbBaseId, isDbPaginated]);
 
 	const addFilter = () => {
 		setFilters((current) => [...current, createFilter()]);
@@ -287,12 +430,13 @@ function DynamicFilter({ data, onFiltered, filteredData }) {
 		}
 
 		if (filter.type === 'dropdown') {
-			if (meta.count > MAX_DROPDOWN_OPTIONS) {
+			if (meta.count > MAX_SEARCHABLE_OPTIONS) {
 				return (
 					<div>
 						<div className="text-warning mb-2">
-							Dropdown is not supported for fields with more than{' '}
-							{MAX_DROPDOWN_OPTIONS} unique values.
+							Searchable Pick Option is not supported for fields
+							with more than {MAX_SEARCHABLE_OPTIONS} unique
+							values.
 						</div>
 						<Form.Control
 							type="text"
@@ -308,20 +452,102 @@ function DynamicFilter({ data, onFiltered, filteredData }) {
 				);
 			}
 
+			const searchTerm = (filter.dropdownSearch || '').toLowerCase();
+			const filteredOptions = meta.values.filter((v) =>
+				String(v).toLowerCase().includes(searchTerm)
+			);
+			const displayOptions = searchTerm
+				? filteredOptions.slice(0, 100)
+				: filteredOptions.slice(0, MAX_DROPDOWN_OPTIONS);
+
 			return (
-				<Form.Select
-					value={filter.dropdown}
-					onChange={(e) =>
-						updateFilter(filter.id, { dropdown: e.target.value })
-					}
-				>
-					<option value="">Select value</option>
-					{meta.values.map((value) => (
-						<option key={value} value={value}>
-							{value}
-						</option>
-					))}
-				</Form.Select>
+				<Dropdown>
+					<Dropdown.Toggle
+						variant="outline-light"
+						className="w-100 text-start d-flex justify-content-between align-items-center"
+					>
+						<span className="text-truncate me-2">
+							{filter.dropdown || 'Select option...'}
+						</span>
+					</Dropdown.Toggle>
+					<Dropdown.Menu
+						className="w-100 bg-dark border-secondary p-2"
+						style={{ maxHeight: '300px', overflowY: 'auto' }}
+					>
+						<Form.Control
+							type="text"
+							placeholder="Search options..."
+							className="mb-2 bg-secondary text-light border-dark"
+							value={filter.dropdownSearch || ''}
+							onChange={(e) =>
+								updateFilter(filter.id, {
+									dropdownSearch: e.target.value
+								})
+							}
+							onClick={(e) => e.stopPropagation()} // Prevent dropdown from closing while typing
+							autoFocus
+						/>
+						{filter.dropdown && (
+							<Dropdown.Item
+								className="text-warning mb-1"
+								onClick={() =>
+									updateFilter(filter.id, {
+										dropdown: '',
+										dropdownSearch: ''
+									})
+								}
+							>
+								Clear Selection
+							</Dropdown.Item>
+						)}
+
+						{displayOptions.length > 0 ? (
+							displayOptions.map((value) => (
+								<Dropdown.Item
+									key={value}
+									className="text-light"
+									onClick={() =>
+										updateFilter(filter.id, {
+											dropdown: value,
+											dropdownSearch: ''
+										})
+									}
+									style={{
+										borderBottom:
+											'1px solid rgba(255,255,255,0.05)'
+									}}
+								>
+									{value}
+								</Dropdown.Item>
+							))
+						) : (
+							<div className="text-muted small p-2">
+								No matches found
+							</div>
+						)}
+
+						{!searchTerm &&
+							filteredOptions.length > MAX_DROPDOWN_OPTIONS && (
+								<div
+									className="text-muted small p-2 text-center"
+									style={{ cursor: 'pointer' }}
+									onClick={(e) => {
+										e.stopPropagation();
+										document
+											.querySelector(
+												`input[placeholder="Search options..."]`
+											)
+											.focus();
+									}}
+								>
+									Search to see{' '}
+									{filteredOptions.length -
+										MAX_DROPDOWN_OPTIONS}{' '}
+									more options
+								</div>
+							)}
+					</Dropdown.Menu>
+				</Dropdown>
 			);
 		}
 
@@ -391,44 +617,158 @@ function DynamicFilter({ data, onFiltered, filteredData }) {
 		);
 	};
 
-	const ExportHandle = () => {
-		const data = filteredData;
-		if (!data || !data.length) {
-			return;
-		}
-		let headers = Object.keys(data[0]);
-		headers = headers.map((header) => `"${header}"`);
-		let csvString = headers.join(',') + '\n';
+	const ExportHandle = async () => {
+		const hasActiveFilters = filters.some((f) => f.field);
+		let headers = [];
 
-		data.forEach((row) => {
-			const values = headers.map((header) => {
-				const key = header.replace(/"/g, '');
-				const value = row[key] != null ? String(row[key]) : '';
-				return `"${value.replace(/"/g, '""')}"`;
-			});
-			csvString += values.join(',') + '\n';
-		});
-		const link = document.createElement('a');
-		link.href =
-			'data:text/csv;charset=utf-8,' + encodeURIComponent(csvString);
-		link.download = 'filtered_data.csv';
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
+		const downloadCsv = (chunks) => {
+			const blob = new Blob(chunks, { type: 'text/csv;charset=utf-8;' });
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = 'filtered_data.csv';
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			URL.revokeObjectURL(url);
+		};
+
+		if (isDbPaginated && dbBaseId) {
+			const targetBaseId = hasActiveFilters
+				? 'dashboard_filtered_sheet'
+				: dbBaseId;
+			const meta = await getDatabaseMeta(targetBaseId);
+			if (!meta || meta.chunks === 0) return;
+
+			const firstChunk = await getDbChunk(targetBaseId, 0);
+			if (!firstChunk || firstChunk.length === 0) return;
+			headers = Object.keys(firstChunk[0]);
+
+			const csvHeaders =
+				headers.map((header) => `"${header}"`).join(',') + '\n';
+			const chunks = [csvHeaders];
+
+			for (let i = 0; i < meta.chunks; i++) {
+				const chunk = await getDbChunk(targetBaseId, i);
+				let chunkString = '';
+				chunk.forEach((row) => {
+					const values = headers.map((header) => {
+						const key = header.replace(/"/g, '');
+						const value = row[key] != null ? String(row[key]) : '';
+						return `"${value.replace(/"/g, '""')}"`;
+					});
+					chunkString += values.join(',') + '\n';
+				});
+				chunks.push(chunkString);
+				await new Promise((resolve) => setTimeout(resolve, 0));
+				setExportProgress(Math.round(((i + 1) / meta.chunks) * 100));
+			}
+			downloadCsv(chunks);
+			setExportProgress(0);
+		} else {
+			const exportData = filteredData;
+			if (!exportData || !exportData.length) return;
+			headers = Object.keys(exportData[0]);
+			const csvHeaders =
+				headers.map((header) => `"${header}"`).join(',') + '\n';
+			const chunks = [csvHeaders];
+
+			for (let i = 0; i < exportData.length; i += 5000) {
+				const chunk = exportData.slice(i, i + 5000);
+				let chunkString = '';
+				chunk.forEach((row) => {
+					const values = headers.map((header) => {
+						const key = header.replace(/"/g, '');
+						const value = row[key] != null ? String(row[key]) : '';
+						return `"${value.replace(/"/g, '""')}"`;
+					});
+					chunkString += values.join(',') + '\n';
+				});
+				chunks.push(chunkString);
+				await new Promise((resolve) => setTimeout(resolve, 0));
+				setExportProgress(
+					Math.round(
+						(Math.min(i + 5000, exportData.length) /
+							exportData.length) *
+							100
+					)
+				);
+			}
+			downloadCsv(chunks);
+			setExportProgress(0);
+		}
 	};
 
 	return (
 		<div className="dynamic-filter mb-4 p-3 rounded bg-secondary bg-opacity-10">
 			<div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-start gap-2 mb-3">
 				<div>
-					<h5 className="mb-1">Dynamic Filters</h5>
+					<h5 className="mb-1 d-flex align-items-center">
+						Dynamic Filters
+					</h5>
 				</div>
 				<Button size="sm" onClick={addFilter} variant="success">
 					Add filter
 				</Button>
-				<Button size="sm" onClick={ExportHandle} variant="success">
+				<Button
+					size="sm"
+					onClick={ExportHandle}
+					variant="success"
+					disabled={isFiltering || exportProgress > 0}
+				>
 					Export
 				</Button>
+
+				{isFiltering && filterProgress > 0 && (
+					<div
+						className="flex-grow-1 d-flex align-items-center"
+						style={{ minWidth: '100px' }}
+					>
+						<ProgressBar
+							variant="success"
+							striped
+							animated
+							now={filterProgress}
+							label={`Filtering: ${filterProgress}%`}
+							style={{
+								height: '24px',
+								width: '50%',
+								borderRadius: '12px',
+								fontWeight: 'bold',
+								fontSize: '14px'
+							}}
+						/>
+
+						{isFiltering && (
+							<span
+								className="ms-3 spinner-border spinner-border-sm text-info"
+								role="status"
+								aria-hidden="true"
+							></span>
+						)}
+					</div>
+				)}
+
+				{exportProgress > 0 && (
+					<div
+						className="flex-grow-1 ms-md-3 mt-2 mt-md-0"
+						style={{ minWidth: '200px' }}
+					>
+						<ProgressBar
+							variant="success"
+							striped
+							animated
+							now={exportProgress}
+							label={`Exporting: ${exportProgress}%`}
+							style={{
+								height: '24px',
+								borderRadius: '12px',
+								fontWeight: 'bold',
+								fontSize: '14px'
+							}}
+						/>
+					</div>
+				)}
 			</div>
 
 			{filters.map((filter, index) => (
@@ -451,6 +791,7 @@ function DynamicFilter({ data, onFiltered, filteredData }) {
 											dateFrom: '',
 											dateTo: '',
 											dropdown: '',
+											dropdownSearch: '',
 											toggleValues: []
 										})
 									}
@@ -479,6 +820,7 @@ function DynamicFilter({ data, onFiltered, filteredData }) {
 											dateFrom: '',
 											dateTo: '',
 											dropdown: '',
+											dropdownSearch: '',
 											toggleValues: []
 										})
 									}

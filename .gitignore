@@ -155,3 +155,4 @@ vite.config.ts.timestamp-*
 .env.development.local
 .env.test.local
 .env.production.local
+package-lock.json
