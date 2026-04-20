@@ -55,6 +55,13 @@ function AppDrawer({ show, onHide, onItemClick }) {
 						className="nav-link fw-bold"
 						onClick={clickHandler}
 					>
+						Home
+					</Link>
+					<Link
+						to="/viewer"
+						className="nav-link text-black fw-bold"
+						onClick={clickHandler}
+					>
 						Json Viewer
 					</Link>
 					<Link

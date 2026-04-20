@@ -55,6 +55,7 @@ function App() {
 	return (
 		<Router>
 			<FloatingButtons onMenuClick={handleMenuClick} />
+
 			<WhatsNewModal />
 			<AppDrawer
 				show={drawerOpen}
