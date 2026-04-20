@@ -52,13 +52,6 @@ function AppDrawer({ show, onHide, onItemClick }) {
 					</Link>
 					<Link
 						to="/viewer"
-						className="nav-link fw-bold"
-						onClick={clickHandler}
-					>
-						Home
-					</Link>
-					<Link
-						to="/viewer"
 						className="nav-link text-black fw-bold"
 						onClick={clickHandler}
 					>
@@ -69,7 +62,7 @@ function AppDrawer({ show, onHide, onItemClick }) {
 						className="nav-link fw-bold"
 						onClick={clickHandler}
 					>
-						Json Diff Viewer
+						Json Diff
 					</Link>
 
 					<Link
@@ -77,7 +70,7 @@ function AppDrawer({ show, onHide, onItemClick }) {
 						className="nav-link fw-bold"
 						onClick={clickHandler}
 					>
-						Json Table Dashboard
+						Data Dashboard
 					</Link>
 
 					<Link
@@ -85,7 +78,7 @@ function AppDrawer({ show, onHide, onItemClick }) {
 						className="nav-link fw-bold"
 						onClick={clickHandler}
 					>
-						Format Code
+						Code Formatter
 					</Link>
 
 					{userSettings.value.current_screen === '/viewer' && (
