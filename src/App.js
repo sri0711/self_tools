@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import DashBoard from './pages/DashBoard';
 import Formatter from './pages/Formatter';
 import Viewer from './pages/Viewer';
+import NotFound from './pages/NotFound';
 
 function App() {
 	const [drawerOpen, setDrawerOpen] = useState(false);
@@ -68,6 +69,7 @@ function App() {
 					<Route path="/format" element={<Formatter />} />
 					<Route path="/jsonDiff" element={<JsonDiff />} />
 					<Route path="/viewer" element={<Viewer />} />
+					<Route path="*" element={<NotFound />} />
 				</Routes>
 			</div>
 		</Router>
