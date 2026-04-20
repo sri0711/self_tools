@@ -1,7 +1,7 @@
 {
 	"homepage": "https://sri0711.github.io/self_tools",
 	"name": "self_tools",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"private": true,
 	"dependencies": {
 		"@microlink/react-json-view": "^1.31.18",
