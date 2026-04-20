@@ -2,24 +2,39 @@ import { useEffect, useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import PackageJson from '../../package.json';
 
-const checkUpdate = async (setChanges, setVersion) => {
+const checkUpdate = async (setChanges, setVersion, setTitle) => {
 	try {
 		if (
 			window.location.hostname === 'localhost' ||
 			window.location.hostname === '127.0.0.1'
 		) {
 			setVersion(`${PackageJson.version}-dev`);
-			setChanges(['Running in development mode. No updates available.']);
+			setTitle('Local Build');
+			setChanges([
+				{
+					version: `${PackageJson.version}-dev`,
+					title: 'Local Build',
+					body: 'Running in development mode. No updates available.'
+				}
+			]);
 			return;
 		}
 		const response = await fetch(
 			'https://api.github.com/repos/sri0711/self_tools/releases'
 		);
 		const data = await response.json();
-		const latestVersion = data[0].tag_name;
-		setVersion(latestVersion);
-		const changes = data.map((release) => release.body);
-		setChanges(changes);
+		if (data && data.length > 0) {
+			const latestVersion = data[0].tag_name;
+			const latestTitle = data[0].name;
+			setVersion(latestVersion);
+			setTitle(latestTitle);
+			const changes = data.map((release) => ({
+				version: release.tag_name,
+				title: release.name,
+				body: release.body
+			}));
+			setChanges(changes);
+		}
 	} catch (error) {
 		console.error('Error checking for updates:', error);
 	}
@@ -28,10 +43,11 @@ const checkUpdate = async (setChanges, setVersion) => {
 function WhatsNewModal() {
 	const [show, setShow] = useState(false);
 	const [version, setVersion] = useState('');
+	const [title, setTitle] = useState('');
 	const [changes, setChanges] = useState([]);
 
 	useEffect(() => {
-		checkUpdate(setChanges, setVersion);
+		checkUpdate(setChanges, setVersion, setTitle);
 	}, []);
 
 	return (
@@ -48,7 +64,9 @@ function WhatsNewModal() {
 
 			<Modal show={show} onHide={() => setShow(false)} centered size="lg">
 				<Modal.Header closeButton>
-					<Modal.Title>What's new in v{version}</Modal.Title>
+					<Modal.Title>
+						What's new in {title ? `- ${title}` : ''} v{version}
+					</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
 					<p className="text-info mb-4">
@@ -68,8 +86,15 @@ function WhatsNewModal() {
 					>
 						{changes.map((change, index) => (
 							<div key={index} className="changeItem">
-								{change}
-								<p className="changeSeparator">
+								<div
+									className="text-info fw-bold mb-2"
+									style={{ fontSize: '1.1rem' }}
+								>
+									{change.version}{' '}
+									{change.title ? `- ${change.title}` : ''}
+								</div>
+								{change.body}
+								<p className="changeSeparator text-secondary mt-3">
 									{index < changes.length - 1
 										? new Array(100).join('-')
 										: ''}
