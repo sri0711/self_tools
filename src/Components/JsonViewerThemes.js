@@ -2,7 +2,7 @@ import { Dropdown } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { setJsonViewerTheme } from '../redux/userSettings';
 
-let themes = [
+const themes = [
 	'apathy',
 	'ashes',
 	'atelierDune',
@@ -42,7 +42,7 @@ let themes = [
 ];
 
 function JsonViewerThemes() {
-	let userSettings = useSelector((state) => state.user_settings.value);
+	const userSettings = useSelector((state) => state.user_settings.value);
 	const dispatch = useDispatch();
 
 	const handleThemeChange = (theme) => {
@@ -51,13 +51,9 @@ function JsonViewerThemes() {
 
 	return (
 		<div className="d-flex justify-content-start align-items-center gap-2 mx-3">
-			<p className="fw-bold text-black me-3 mt-2">Theme</p>
-			<Dropdown
-				title={userSettings.json_viewer_theme}
-				className="dropDown"
-				id="nav-dropdown"
-			>
-				<Dropdown.Toggle variant="light" id="dropdown-basic">
+			<p className="fw-bold text-light me-3 mt-2">Theme</p>
+			<Dropdown className="dropDown" id="nav-dropdown">
+				<Dropdown.Toggle variant="outline-info" id="dropdown-basic">
 					{userSettings.json_viewer_theme}
 				</Dropdown.Toggle>
 				<Dropdown.Menu className="dropDownMenu">
@@ -69,7 +65,6 @@ function JsonViewerThemes() {
 						return (
 							<Dropdown.Item
 								key={theme}
-								value={theme}
 								onClick={() => handleThemeChange(theme)}
 							>
 								{theme}

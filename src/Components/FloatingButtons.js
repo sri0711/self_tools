@@ -6,19 +6,19 @@ import { setJsonData } from '../redux/JsonHandler';
 import { setFileHandlerModal } from '../redux/userSettings';
 
 function FloatingButtons({ onMenuClick }) {
-	let userSetting = useSelector((state) => state.user_settings.value);
-	const Dispatch = useDispatch();
+	const userSetting = useSelector((state) => state.user_settings.value);
+	const dispatch = useDispatch();
 
-	const HandleValuePaste = async (e, buttonValue) => {
+	const handleValuePaste = async (e, buttonValue) => {
 		e.preventDefault();
-		let pastedData = await navigator.clipboard.readText();
+		const pastedData = await navigator.clipboard.readText();
 		let writeData = null;
 		try {
 			writeData = JSON.parse(pastedData);
 		} catch {
 			writeData = pastedData;
 		}
-		Dispatch(
+		dispatch(
 			buttonValue === 1
 				? setJson1DiffData(writeData)
 				: setJson2DiffData(writeData)
@@ -26,18 +26,18 @@ function FloatingButtons({ onMenuClick }) {
 	};
 
 	const handlePasteValueForJsonEditor = async () => {
-		let pastedData = await navigator.clipboard.readText();
+		const pastedData = await navigator.clipboard.readText();
 		let writeData = null;
 		try {
 			writeData = JSON.parse(pastedData);
 		} catch {
 			writeData = pastedData;
 		}
-		Dispatch(setJsonData(writeData));
+		dispatch(setJsonData(writeData));
 	};
 
 	const openFileHandlerModal = () => {
-		Dispatch(setFileHandlerModal());
+		dispatch(setFileHandlerModal());
 	};
 
 	return (
@@ -47,7 +47,7 @@ function FloatingButtons({ onMenuClick }) {
 					<Button
 						variant="dark"
 						className="floatingMenuButton diffButton_1"
-						onClick={(e) => HandleValuePaste(e, 1)}
+						onClick={(e) => handleValuePaste(e, 1)}
 					>
 						<Image
 							src={save}
@@ -58,7 +58,7 @@ function FloatingButtons({ onMenuClick }) {
 					<Button
 						variant="dark"
 						className="floatingMenuButton diffButton_2"
-						onClick={(e) => HandleValuePaste(e, 2)}
+						onClick={(e) => handleValuePaste(e, 2)}
 					>
 						<Image
 							src={save}
@@ -86,7 +86,9 @@ function FloatingButtons({ onMenuClick }) {
 					aria-label="Edit"
 					title="Edit"
 				>
-					<h2>📝</h2>
+					<span style={{ fontSize: '1.5rem', lineHeight: 1 }}>
+						📝
+					</span>
 				</Button>
 			)}
 

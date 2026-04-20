@@ -5,7 +5,7 @@ import React, {
 	useRef,
 	useState
 } from 'react';
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, Dropdown } from 'react-bootstrap';
 import Editor from '@monaco-editor/react';
 import detectLanguage from '../Tools/detectLanguage';
 import { formatCodeWithPrettier } from '../Tools/formatCode';
@@ -39,36 +39,17 @@ function Formatter() {
 	const [language, setLanguage] = useState('javascript');
 	const [autoDetect, setAutoDetect] = useState(true);
 	const [detectedLanguage, setDetectedLanguage] = useState('javascript');
-	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const editorRef = useRef(null);
 	const autoDetectRef = useRef(autoDetect);
-	const dropdownRef = useRef(null);
 
 	useEffect(() => {
 		autoDetectRef.current = autoDetect;
 	}, [autoDetect]);
 
-	useEffect(() => {
-		const handleClickOutside = (event) => {
-			if (
-				dropdownRef.current &&
-				!dropdownRef.current.contains(event.target)
-			) {
-				setDropdownOpen(false);
-			}
-		};
-
-		document.addEventListener('mousedown', handleClickOutside);
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	}, []);
-
 	const handleLanguageSelect = useCallback((selectedLanguage) => {
 		setLanguage(selectedLanguage);
 		setDetectedLanguage(selectedLanguage);
 		setAutoDetect(false);
-		setDropdownOpen(false);
 	}, []);
 
 	const handleEditorMount = useCallback((editor) => {
@@ -129,79 +110,31 @@ function Formatter() {
 			<div className="d-flex flex-wrap align-items-center gap-3 mb-3">
 				<div className="d-flex flex-column">
 					<Form.Label className="small mb-1">Language</Form.Label>
-					<div className="position-relative" ref={dropdownRef}>
-						<div
-							className="bg-secondary text-light border border-secondary rounded px-3 py-2 d-flex justify-content-between align-items-center"
-							style={{
-								width: 'auto',
-								minWidth: '120px',
-								cursor: 'pointer',
-								transition: 'all 0.2s ease'
-							}}
-							onClick={() => setDropdownOpen(!dropdownOpen)}
+					<Dropdown>
+						<Dropdown.Toggle
+							variant="outline-secondary"
+							className="text-light text-capitalize"
+							style={{ minWidth: '120px' }}
 						>
-							<span className="text-capitalize">{language}</span>
-							<span
-								className="ms-2"
-								style={{
-									transform: dropdownOpen
-										? 'rotate(180deg)'
-										: 'rotate(0deg)',
-									transition: 'transform 0.2s ease'
-								}}
-							>
-								▼
-							</span>
-						</div>
-						{dropdownOpen && (
-							<div
-								className="position-absolute bg-secondary border border-secondary rounded mt-1 shadow"
-								style={{
-									width: 'auto',
-									minWidth: '120px',
-									maxHeight: '200px',
-									overflowY: 'auto',
-									zIndex: 1000,
-									top: '100%'
-								}}
-							>
-								{availableLanguages.map((lang) => (
-									<div
-										key={lang}
-										className="px-3 py-2 text-capitalize"
-										style={{
-											cursor: 'pointer',
-											backgroundColor:
-												lang === language
-													? '#0d6efd'
-													: undefined,
-											color:
-												lang === language
-													? '#fff'
-													: '#f8fafc'
-										}}
-										onClick={() =>
-											handleLanguageSelect(lang)
-										}
-										onMouseEnter={(e) => {
-											if (lang !== language) {
-												e.target.style.backgroundColor =
-													'#374151';
-											}
-										}}
-										onMouseLeave={(e) => {
-											if (lang !== language) {
-												e.target.style.backgroundColor =
-													'';
-											}
-										}}
-									>
-										{lang}
-									</div>
-								))}
-							</div>
-						)}
-					</div>
+							{language}
+						</Dropdown.Toggle>
+
+						<Dropdown.Menu
+							variant="dark"
+							style={{ maxHeight: '250px', overflowY: 'auto' }}
+						>
+							{availableLanguages.map((lang) => (
+								<Dropdown.Item
+									key={lang}
+									active={lang === language}
+									className="text-capitalize"
+									onClick={() => handleLanguageSelect(lang)}
+								>
+									{lang}
+								</Dropdown.Item>
+							))}
+						</Dropdown.Menu>
+					</Dropdown>
 				</div>
 
 				<div className="d-flex align-items-center gap-2">
