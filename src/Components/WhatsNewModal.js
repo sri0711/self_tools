@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import PackageJson from '../../package.json';
 
-let checkUpdate = async (setChanges, setVersion) => {
+const checkUpdate = async (setChanges, setVersion) => {
 	try {
 		if (
 			window.location.hostname === 'localhost' ||
@@ -12,13 +12,13 @@ let checkUpdate = async (setChanges, setVersion) => {
 			setChanges(['Running in development mode. No updates available.']);
 			return;
 		}
-		let response = await fetch(
+		const response = await fetch(
 			'https://api.github.com/repos/sri0711/self_tools/releases'
 		);
-		let data = await response.json();
-		let latestVersion = data[0].tag_name;
+		const data = await response.json();
+		const latestVersion = data[0].tag_name;
 		setVersion(latestVersion);
-		let changes = data.map((release) => release.body);
+		const changes = data.map((release) => release.body);
 		setChanges(changes);
 	} catch (error) {
 		console.error('Error checking for updates:', error);
@@ -51,15 +51,19 @@ function WhatsNewModal() {
 					<Modal.Title>What's new in v{version}</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					<p>
-						Change Log of Latest updates and improvements : Self
-						Tools
+					<p className="text-info mb-4">
+						<strong>Change Log</strong> of the latest updates and
+						improvements for Self Tools.
 					</p>
 					<div
 						style={{
 							maxHeight: '400px',
 							overflowY: 'auto',
-							whiteSpace: 'pre-wrap'
+							whiteSpace: 'pre-wrap',
+							background: 'rgba(0, 0, 0, 0.2)',
+							padding: '15px',
+							borderRadius: '10px',
+							border: '1px solid rgba(255, 255, 255, 0.05)'
 						}}
 					>
 						{changes.map((change, index) => (

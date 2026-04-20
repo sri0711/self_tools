@@ -6,6 +6,7 @@ import {
 	writeDbChunk,
 	writeDbMeta
 } from '../Tools/clientDatabase';
+import { processCsvExport } from '../Tools/exportUtils';
 
 const MAX_TOGGLE_OPTIONS = 7;
 const MAX_DROPDOWN_OPTIONS = 15;
@@ -617,86 +618,18 @@ function DynamicFilter({
 		);
 	};
 
-	const ExportHandle = async () => {
+	const handleExport = async () => {
 		const hasActiveFilters = filters.some((f) => f.field);
-		let headers = [];
 
-		const downloadCsv = (chunks) => {
-			const blob = new Blob(chunks, { type: 'text/csv;charset=utf-8;' });
-			const url = URL.createObjectURL(blob);
-			const link = document.createElement('a');
-			link.href = url;
-			link.download = 'filtered_data.csv';
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-			URL.revokeObjectURL(url);
-		};
+		await processCsvExport({
+			isDbPaginated,
+			dbBaseId,
+			hasActiveFilters,
+			filteredData,
+			setExportProgress
+		});
 
-		if (isDbPaginated && dbBaseId) {
-			const targetBaseId = hasActiveFilters
-				? 'dashboard_filtered_sheet'
-				: dbBaseId;
-			const meta = await getDatabaseMeta(targetBaseId);
-			if (!meta || meta.chunks === 0) return;
-
-			const firstChunk = await getDbChunk(targetBaseId, 0);
-			if (!firstChunk || firstChunk.length === 0) return;
-			headers = Object.keys(firstChunk[0]);
-
-			const csvHeaders =
-				headers.map((header) => `"${header}"`).join(',') + '\n';
-			const chunks = [csvHeaders];
-
-			for (let i = 0; i < meta.chunks; i++) {
-				const chunk = await getDbChunk(targetBaseId, i);
-				let chunkString = '';
-				chunk.forEach((row) => {
-					const values = headers.map((header) => {
-						const key = header.replace(/"/g, '');
-						const value = row[key] != null ? String(row[key]) : '';
-						return `"${value.replace(/"/g, '""')}"`;
-					});
-					chunkString += values.join(',') + '\n';
-				});
-				chunks.push(chunkString);
-				await new Promise((resolve) => setTimeout(resolve, 0));
-				setExportProgress(Math.round(((i + 1) / meta.chunks) * 100));
-			}
-			downloadCsv(chunks);
-			setExportProgress(0);
-		} else {
-			const exportData = filteredData;
-			if (!exportData || !exportData.length) return;
-			headers = Object.keys(exportData[0]);
-			const csvHeaders =
-				headers.map((header) => `"${header}"`).join(',') + '\n';
-			const chunks = [csvHeaders];
-
-			for (let i = 0; i < exportData.length; i += 5000) {
-				const chunk = exportData.slice(i, i + 5000);
-				let chunkString = '';
-				chunk.forEach((row) => {
-					const values = headers.map((header) => {
-						const key = header.replace(/"/g, '');
-						const value = row[key] != null ? String(row[key]) : '';
-						return `"${value.replace(/"/g, '""')}"`;
-					});
-					chunkString += values.join(',') + '\n';
-				});
-				chunks.push(chunkString);
-				await new Promise((resolve) => setTimeout(resolve, 0));
-				setExportProgress(
-					Math.round(
-						(Math.min(i + 5000, exportData.length) /
-							exportData.length) *
-							100
-					)
-				);
-			}
-			downloadCsv(chunks);
-			setExportProgress(0);
-		}
+		setExportProgress(0);
 	};
 
 	return (
@@ -712,7 +645,7 @@ function DynamicFilter({
 				</Button>
 				<Button
 					size="sm"
-					onClick={ExportHandle}
+					onClick={handleExport}
 					variant="success"
 					disabled={isFiltering || exportProgress > 0}
 				>

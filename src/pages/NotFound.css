@@ -1,0 +1,54 @@
+.not-found-page {
+	background-color: #020617;
+	color: #f8fafc;
+	overflow: hidden;
+	position: relative;
+	z-index: 1;
+}
+
+.dark-mode-gif {
+	max-width: 400px;
+	width: 100%;
+	height: auto;
+	/* Keeps original light mode colors with a glowing background window */
+	background-color: #f8fafc;
+	box-shadow: 0 10px 40px rgba(56, 189, 248, 0.2);
+	border-radius: 16px;
+	padding: 15px;
+	pointer-events: none;
+}
+
+.not-found-title {
+	text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+}
+
+.not-found-text {
+	max-width: 500px;
+	font-size: 1.1rem;
+}
+
+@keyframes fadeInUp {
+	0% {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.fade-in {
+	opacity: 0;
+	animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.delay-100 {
+	animation-delay: 100ms;
+}
+.delay-200 {
+	animation-delay: 200ms;
+}
+.delay-300 {
+	animation-delay: 300ms;
+}

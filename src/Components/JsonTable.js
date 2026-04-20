@@ -78,35 +78,36 @@ function JsonTable({
 
 	return (
 		<div className="w-100">
-			<div className="d-flex justify-content-between align-items-center mb-2">
-				<span className="text-light">
-					Showing{' '}
-					{totalEntries > 0 ? (currentPage - 1) * rowsPerPage + 1 : 0}{' '}
-					to {Math.min(currentPage * rowsPerPage, totalEntries)} of{' '}
-					{totalEntries} entries
-				</span>
-				<div>
-					<button
-						className="btn btn-sm btn-secondary mx-1"
-						disabled={currentPage === 1}
-						onClick={() => handlePageChange(currentPage - 1)}
-					>
-						Previous
-					</button>
-					<span className="text-light mx-2">
-						Page {currentPage} of {totalPages || 1}
+			{totalEntries > 0 && (
+				<div className="d-flex justify-content-between align-items-center mb-3">
+					<span className="text-light">
+						Showing {(currentPage - 1) * rowsPerPage + 1} to{' '}
+						{Math.min(currentPage * rowsPerPage, totalEntries)} of{' '}
+						{totalEntries} entries
 					</span>
-					<button
-						className="btn btn-sm btn-secondary mx-1"
-						disabled={
-							currentPage === totalPages || totalPages === 0
-						}
-						onClick={() => handlePageChange(currentPage + 1)}
-					>
-						Next
-					</button>
+					<div>
+						<button
+							className="btn btn-sm btn-outline-secondary text-light mx-1"
+							disabled={currentPage === 1}
+							onClick={() => handlePageChange(currentPage - 1)}
+						>
+							Previous
+						</button>
+						<span className="text-light mx-2">
+							Page {currentPage} of {totalPages || 1}
+						</span>
+						<button
+							className="btn btn-sm btn-outline-secondary text-light mx-1"
+							disabled={
+								currentPage === totalPages || totalPages === 0
+							}
+							onClick={() => handlePageChange(currentPage + 1)}
+						>
+							Next
+						</button>
+					</div>
 				</div>
-			</div>
+			)}
 			<div className="table-responsive">
 				<Table striped bordered hover variant="dark" className="mb-0">
 					<thead>

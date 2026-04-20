@@ -4,12 +4,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setJsonData } from '../redux/JsonHandler';
 
 function Viewer() {
-	let userSettings = useSelector((state) => state.user_settings.value);
-	let jsonData = useSelector((state) => state.json_data.value);
-	const Dispatch = useDispatch();
+	const userSettings = useSelector((state) => state.user_settings.value);
+	const jsonData = useSelector((state) => state.json_data.value);
+	const dispatch = useDispatch();
 
 	const updateData = (newData) => {
-		Dispatch(setJsonData(newData));
+		dispatch(setJsonData(newData));
 	};
 
 	return (

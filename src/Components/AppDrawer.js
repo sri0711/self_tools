@@ -4,15 +4,16 @@ import JsonViewerThemes from './JsonViewerThemes';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentScreen } from '../redux/userSettings';
 
+const availableScreens = {
+	'/': 'Home',
+	'/jsonDiff': 'Json Diff',
+	'/dashboard': 'Dashboard',
+	'/format': 'Code Formatter',
+	'/viewer': 'Editor'
+};
+
 function AppDrawer({ show, onHide, onItemClick }) {
-	const Dispatch = useDispatch();
-	let availableScreens = {
-		'/': 'Home',
-		'/jsonDiff': 'Json Diff',
-		'/dashboard': 'Dashboard',
-		'/format': 'Code Formatter',
-		'/viewer': 'Editor'
-	};
+	const dispatch = useDispatch();
 	const userSettings = useSelector((state) => {
 		return state.user_settings;
 	});
@@ -21,8 +22,10 @@ function AppDrawer({ show, onHide, onItemClick }) {
 		const linkUrl = new URL(e.currentTarget.href);
 		const hash = linkUrl.hash || '#/';
 		const routePath = hash.startsWith('#') ? hash.slice(1) : hash;
-		Dispatch(setCurrentScreen(routePath));
-		onItemClick();
+		dispatch(setCurrentScreen(routePath));
+		if (onItemClick) {
+			onItemClick();
+		}
 	};
 	return (
 		<Offcanvas
@@ -42,7 +45,14 @@ function AppDrawer({ show, onHide, onItemClick }) {
 				<Nav className="flex-column gap-2">
 					<Link
 						to="/"
-						className="nav-link text-black fw-bold"
+						className="nav-link fw-bold"
+						onClick={clickHandler}
+					>
+						Home
+					</Link>
+					<Link
+						to="/viewer"
+						className="nav-link fw-bold"
 						onClick={clickHandler}
 					>
 						Home
@@ -56,7 +66,7 @@ function AppDrawer({ show, onHide, onItemClick }) {
 					</Link>
 					<Link
 						to="/jsonDiff"
-						className="nav-link text-black fw-bold"
+						className="nav-link fw-bold"
 						onClick={clickHandler}
 					>
 						Json Diff Viewer
@@ -64,7 +74,7 @@ function AppDrawer({ show, onHide, onItemClick }) {
 
 					<Link
 						to="/dashboard"
-						className="nav-link text-black fw-bold"
+						className="nav-link fw-bold"
 						onClick={clickHandler}
 					>
 						Json Table Dashboard
@@ -72,7 +82,7 @@ function AppDrawer({ show, onHide, onItemClick }) {
 
 					<Link
 						to="/format"
-						className="nav-link text-black fw-bold"
+						className="nav-link fw-bold"
 						onClick={clickHandler}
 					>
 						Format Code

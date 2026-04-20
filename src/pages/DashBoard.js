@@ -11,7 +11,7 @@ import {
 import { Spinner } from 'react-bootstrap';
 
 function DashBoard() {
-	let dashboardData = useSelector((state) => state.dashboard_data.value);
+	const dashboardData = useSelector((state) => state.dashboard_data.value);
 	const [fullData, setFullData] = useState([]);
 	const [filteredData, setFilteredData] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +19,6 @@ function DashBoard() {
 	const [totalRows, setTotalRows] = useState(0);
 	const [isDbPaginated, setIsDbPaginated] = useState(false);
 	const [isTableDbPaginated, setIsTableDbPaginated] = useState(false);
-	const [isFilterActive, setIsFilterActive] = useState(false);
 	const isFilterActiveRef = useRef(false);
 
 	// Reset page to 1 when a new file is imported
@@ -27,7 +26,6 @@ function DashBoard() {
 		const loadData = async () => {
 			if (!dashboardData) return;
 			setCurrentPage(1);
-			setIsFilterActive(false);
 			isFilterActiveRef.current = false;
 
 			if (dashboardData && dashboardData.isLarge) {
@@ -67,7 +65,7 @@ function DashBoard() {
 			}
 		};
 		loadData();
-	}, [dashboardData?.timestamp]);
+	}, [dashboardData]);
 
 	// Handle table page flips explicitly
 	useEffect(() => {
@@ -89,7 +87,6 @@ function DashBoard() {
 
 	const handleFiltered = useCallback(
 		async (result, active) => {
-			setIsFilterActive(active);
 			isFilterActiveRef.current = active;
 
 			if (active) {

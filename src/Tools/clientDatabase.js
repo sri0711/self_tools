@@ -7,8 +7,12 @@ const DB_NAME = 'SelfToolsDatabase';
 const DB_VERSION = 1;
 const STORE_NAME = 'large_files_store';
 
+let dbPromise = null;
+
 export const initDB = () => {
-	return new Promise((resolve, reject) => {
+	if (dbPromise) return dbPromise;
+
+	dbPromise = new Promise((resolve, reject) => {
 		const request = indexedDB.open(DB_NAME, DB_VERSION);
 
 		request.onupgradeneeded = (event) => {
@@ -23,9 +27,12 @@ export const initDB = () => {
 		};
 
 		request.onerror = (event) => {
+			dbPromise = null; // Reset on error
 			reject(event.target.error);
 		};
 	});
+
+	return dbPromise;
 };
 
 export const storeLargeData = async (id, data) => {
@@ -56,43 +63,56 @@ export const retrieveLargeData = async (id) => {
 	});
 };
 
+const putChunk = (db, baseId, chunkIndex, chunkData) => {
+	return new Promise((resolve, reject) => {
+		const tx = db.transaction(STORE_NAME, 'readwrite');
+		const req = tx
+			.objectStore(STORE_NAME)
+			.put({ id: `${baseId}_chunk_${chunkIndex}`, data: chunkData });
+		req.onsuccess = () => resolve(true);
+		req.onerror = reject;
+	});
+};
+
+const getChunk = (db, baseId, chunkIndex) => {
+	return new Promise((resolve, reject) => {
+		const tx = db.transaction(STORE_NAME, 'readonly');
+		const req = tx
+			.objectStore(STORE_NAME)
+			.get(`${baseId}_chunk_${chunkIndex}`);
+		req.onsuccess = (e) =>
+			resolve(e.target.result ? e.target.result.data : []);
+		req.onerror = reject;
+	});
+};
+
 export const storeChunkedData = async (baseId, dataArray, onProgress) => {
 	const db = await initDB();
 	const chunkSize = 20000;
 	const chunks = Math.ceil(dataArray.length / chunkSize);
 
-	return new Promise(async (resolve, reject) => {
-		try {
-			const metaTx = db.transaction(STORE_NAME, 'readwrite');
-			metaTx.objectStore(STORE_NAME).put({
-				id: `${baseId}_meta`,
-				chunks,
-				totalRows: dataArray.length
-			});
+	try {
+		const metaTx = db.transaction(STORE_NAME, 'readwrite');
+		metaTx.objectStore(STORE_NAME).put({
+			id: `${baseId}_meta`,
+			chunks,
+			totalRows: dataArray.length
+		});
 
-			for (let i = 0; i < chunks; i++) {
-				const chunkData = dataArray.slice(
-					i * chunkSize,
-					(i + 1) * chunkSize
-				);
-				await new Promise((res, rej) => {
-					const tx = db.transaction(STORE_NAME, 'readwrite');
-					const req = tx
-						.objectStore(STORE_NAME)
-						.put({ id: `${baseId}_chunk_${i}`, data: chunkData });
-					req.onsuccess = res;
-					req.onerror = rej;
-				});
+		for (let i = 0; i < chunks; i++) {
+			const chunkData = dataArray.slice(
+				i * chunkSize,
+				(i + 1) * chunkSize
+			);
+			await putChunk(db, baseId, i, chunkData);
 
-				if (onProgress)
-					onProgress(Math.round(((i + 1) / chunks) * 100));
-				await new Promise((r) => setTimeout(r, 10)); // Yield to keep UI smooth
-			}
-			resolve(true);
-		} catch (err) {
-			reject(err);
+			if (onProgress) onProgress(Math.round(((i + 1) / chunks) * 100));
+			await new Promise((r) => setTimeout(r, 10)); // Yield to keep UI smooth
 		}
-	});
+		return true;
+	} catch (err) {
+		throw err;
+	}
 };
 
 export const retrieveChunkedData = async (baseId, onProgress) => {
@@ -109,15 +129,7 @@ export const retrieveChunkedData = async (baseId, onProgress) => {
 
 		let fullData = [];
 		for (let i = 0; i < meta.chunks; i++) {
-			const chunk = await new Promise((resolve, reject) => {
-				const tx = db.transaction(STORE_NAME, 'readonly');
-				const req = tx
-					.objectStore(STORE_NAME)
-					.get(`${baseId}_chunk_${i}`);
-				req.onsuccess = (e) =>
-					resolve(e.target.result ? e.target.result.data : []);
-				req.onerror = reject;
-			});
+			const chunk = await getChunk(db, baseId, i);
 			fullData = fullData.concat(chunk);
 			if (onProgress)
 				onProgress(Math.round(((i + 1) / meta.chunks) * 100));
@@ -171,13 +183,7 @@ export const retrieveDataByPage = async (baseId, page, limit) => {
 
 	let fetchedData = [];
 	for (let i = startChunk; i <= endChunk; i++) {
-		const chunk = await new Promise((resolve, reject) => {
-			const tx = db.transaction(STORE_NAME, 'readonly');
-			const req = tx.objectStore(STORE_NAME).get(`${baseId}_chunk_${i}`);
-			req.onsuccess = (e) =>
-				resolve(e.target.result ? e.target.result.data : []);
-			req.onerror = reject;
-		});
+		const chunk = await getChunk(db, baseId, i);
 		fetchedData = fetchedData.concat(chunk);
 	}
 

@@ -9,14 +9,13 @@ import {
 } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { setFileHandlerModal } from '../redux/userSettings';
-import * as XLSX from 'xlsx';
 import { setDashboardData } from '../redux/dashBoardHandler';
 import { storeLargeData, storeChunkedData } from '../Tools/clientDatabase';
-import Papa from 'papaparse';
+import { parseFile } from '../Tools/fileParser';
 
 function FileHandlerModel() {
 	const userSetting = useSelector((state) => state.user_settings.value);
-	const Dispatch = useDispatch();
+	const dispatch = useDispatch();
 
 	const [file, setFile] = useState(null);
 	const [parsedData, setParsedData] = useState(null);
@@ -42,7 +41,7 @@ function FileHandlerModel() {
 
 	const closeModal = () => {
 		resetState();
-		Dispatch(setFileHandlerModal());
+		dispatch(setFileHandlerModal());
 	};
 
 	const handleFileChange = async (event) => {
@@ -76,75 +75,11 @@ function FileHandlerModel() {
 		await new Promise((resolve) => setTimeout(resolve, 50));
 
 		try {
-			let sheets = {};
-			let defaultSheetName = '';
-
-			if (normalizedName.endsWith('.csv')) {
-				setStatusText('Parsing CSV in background worker...');
-				sheets = await new Promise((resolve, reject) => {
-					let accumulatedData = [];
-					Papa.parse(selected, {
-						header: true,
-						skipEmptyLines: true,
-						worker: true, // Prevents UI freeze by moving to background thread
-						chunk: (results) => {
-							// Push iteratively to prevent call stack size limit errors on massive chunks
-							for (let i = 0; i < results.data.length; i++) {
-								accumulatedData.push(results.data[i]);
-							}
-							if (selected.size > 0) {
-								const percent = Math.round(
-									(results.meta.cursor / selected.size) * 100
-								);
-								setProgress(percent);
-							}
-						},
-						error: reject,
-						complete: () => {
-							setProgress(100);
-							resolve({ [selected.name]: accumulatedData });
-						}
-					});
-				});
-				defaultSheetName = selected.name;
-			} else {
-				setStatusText('Reading Spreadsheet File...');
-				const arrayBuffer = await new Promise((resolve, reject) => {
-					const reader = new FileReader();
-					reader.onprogress = (event) => {
-						if (event.lengthComputable) {
-							setProgress(
-								Math.round((event.loaded / event.total) * 50)
-							);
-						}
-					};
-					reader.onload = (e) => resolve(e.target.result);
-					reader.onerror = reject;
-					reader.readAsArrayBuffer(selected);
-				});
-
-				setStatusText('Parsing Spreadsheet Data...');
-				setProgress(75);
-				await new Promise((resolve) => setTimeout(resolve, 50));
-
-				const data = new Uint8Array(arrayBuffer);
-				const workbook = XLSX.read(data, {
-					type: 'array',
-					cellDates: true
-				});
-
-				sheets = workbook.SheetNames.reduce((acc, name) => {
-					acc[name] = XLSX.utils.sheet_to_json(
-						workbook.Sheets[name],
-						{
-							defval: null
-						}
-					);
-					return acc;
-				}, {});
-				setProgress(100);
-				defaultSheetName = workbook.SheetNames[0] || '';
-			}
+			const { sheets, defaultSheetName } = await parseFile(
+				selected,
+				setProgress,
+				setStatusText
+			);
 
 			setParsedData(sheets);
 			setSelectedSheet(defaultSheetName);
@@ -175,7 +110,7 @@ function FileHandlerModel() {
 			: jsonString;
 	}, [parsedData, selectedSheet]);
 
-	const HandleDataImport = async () => {
+	const handleDataImport = async () => {
 		if (!parsedData || !selectedSheet) return;
 
 		setLoading(true);
@@ -197,7 +132,7 @@ function FileHandlerModel() {
 			await storeLargeData('dashboard_active_sheet', dataToImport);
 		}
 
-		Dispatch(
+		dispatch(
 			setDashboardData({
 				isLarge: true,
 				totalRows: isArray ? dataToImport.length : 1,
@@ -207,7 +142,7 @@ function FileHandlerModel() {
 		closeModal();
 	};
 
-	const HandlePateData = async () => {
+	const handlePasteData = async () => {
 		if (!navigator.clipboard) {
 			return;
 		}
@@ -228,7 +163,7 @@ function FileHandlerModel() {
 		setStatusText('Pasting to database...');
 		setProgress(0);
 		await storeChunkedData('dashboard_active_sheet', dataArr, setProgress);
-		Dispatch(
+		dispatch(
 			setDashboardData({
 				isLarge: true,
 				totalRows: dataArr.length,
@@ -279,7 +214,12 @@ function FileHandlerModel() {
 								animated
 								now={progress}
 								label={`${progress}%`}
-								style={{ height: '24px', borderRadius: '12px', fontWeight: 'bold', fontSize: '14px' }}
+								style={{
+									height: '24px',
+									borderRadius: '12px',
+									fontWeight: 'bold',
+									fontSize: '14px'
+								}}
 							/>
 						)}
 					</div>
@@ -350,12 +290,12 @@ function FileHandlerModel() {
 					Close
 				</Button>
 				{parsedData && selectedSheet && (
-					<Button variant="primary" onClick={HandleDataImport}>
+					<Button variant="primary" onClick={handleDataImport}>
 						Import to Dashboard
 					</Button>
 				)}{' '}
 				{!parsedData && !selectedSheet && (
-					<Button variant="primary" onClick={HandlePateData}>
+					<Button variant="primary" onClick={handlePasteData}>
 						Paste to Dashboard
 					</Button>
 				)}
