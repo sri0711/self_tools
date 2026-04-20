@@ -9,6 +9,7 @@ import JsonDiff from './pages/JsonDiff';
 import { useSelector } from 'react-redux';
 import DashBoard from './pages/DashBoard';
 import Formatter from './pages/Formatter';
+import Viewer from './pages/Viewer';
 
 function App() {
 	const [drawerOpen, setDrawerOpen] = useState(false);
@@ -53,6 +54,7 @@ function App() {
 	return (
 		<Router>
 			<FloatingButtons onMenuClick={handleMenuClick} />
+
 			<WhatsNewModal />
 			<AppDrawer
 				show={drawerOpen}
@@ -66,6 +68,7 @@ function App() {
 					<Route path="/dashboard" element={<DashBoard />} />
 					<Route path="/format" element={<Formatter />} />
 					<Route path="/jsonDiff" element={<JsonDiff />} />
+					<Route path="/viewer" element={<Viewer />} />
 				</Routes>
 			</div>
 		</Router>

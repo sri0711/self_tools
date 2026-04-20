@@ -7,10 +7,11 @@ import { setCurrentScreen } from '../redux/userSettings';
 function AppDrawer({ show, onHide, onItemClick }) {
 	const Dispatch = useDispatch();
 	let availableScreens = {
-		'/': 'Editor',
+		'/': 'Home',
 		'/jsonDiff': 'Json Diff',
 		'/dashboard': 'Dashboard',
-		'/format': 'Code Formatter'
+		'/format': 'Code Formatter',
+		'/viewer': 'Editor'
 	};
 	const userSettings = useSelector((state) => {
 		return state.user_settings;
@@ -44,6 +45,13 @@ function AppDrawer({ show, onHide, onItemClick }) {
 						className="nav-link text-black fw-bold"
 						onClick={clickHandler}
 					>
+						Home
+					</Link>
+					<Link
+						to="/viewer"
+						className="nav-link text-black fw-bold"
+						onClick={clickHandler}
+					>
 						Json Viewer
 					</Link>
 					<Link
@@ -70,7 +78,7 @@ function AppDrawer({ show, onHide, onItemClick }) {
 						Format Code
 					</Link>
 
-					{userSettings.value.current_screen === '/' && (
+					{userSettings.value.current_screen === '/viewer' && (
 						<JsonViewerThemes />
 					)}
 				</Nav>
