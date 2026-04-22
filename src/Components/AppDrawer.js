@@ -7,9 +7,21 @@ import { setCurrentScreen } from '../redux/userSettings';
 const availableScreens = {
 	'/': 'Home',
 	'/jsonDiff': 'Json Diff',
-	'/dashboard': 'Dashboard',
+	'/dashboard': 'Data Dashboard',
 	'/format': 'Code Formatter',
-	'/viewer': 'Editor'
+	'/viewer': 'JSON Editor',
+	'/url-manipulator': 'URL Manipulator',
+	'/json-model-generator': 'JSON Model Generator'
+};
+
+const screenThemes = {
+	'/': '',
+	'/jsonDiff': 'theme-mint',
+	'/dashboard': 'theme-amber',
+	'/format': 'theme-purple',
+	'/viewer': 'theme-cyan',
+	'/url-manipulator': 'theme-pink',
+	'/json-model-generator': 'theme-red'
 };
 
 function AppDrawer({ show, onHide, onItemClick }) {
@@ -17,6 +29,7 @@ function AppDrawer({ show, onHide, onItemClick }) {
 	const userSettings = useSelector((state) => {
 		return state.user_settings;
 	});
+	const currentScreen = userSettings.value.current_screen;
 
 	const clickHandler = (e) => {
 		const linkUrl = new URL(e.currentTarget.href);
@@ -27,47 +40,50 @@ function AppDrawer({ show, onHide, onItemClick }) {
 			onItemClick();
 		}
 	};
+
+	const getLinkClass = (path) => {
+		return `nav-link fw-bold ${currentScreen === path ? 'active-link' : ''}`;
+	};
+
 	return (
 		<Offcanvas
 			show={show}
 			onHide={onHide}
 			placement="end"
-			className="appDrawer"
+			className={`appDrawer ${screenThemes[currentScreen] || ''}`}
 		>
 			<Offcanvas.Header closeButton>
 				<Offcanvas.Title>
-					Menu :{' '}
-					{availableScreens[userSettings.value.current_screen] ||
-						'Unknown Screen'}
+					Menu : {availableScreens[currentScreen] || 'Unknown Screen'}
 				</Offcanvas.Title>
 			</Offcanvas.Header>
 			<Offcanvas.Body>
 				<Nav className="flex-column gap-2">
 					<Link
 						to="/"
-						className="nav-link fw-bold"
+						className={getLinkClass('/')}
 						onClick={clickHandler}
 					>
 						Home
 					</Link>
 					<Link
 						to="/viewer"
-						className="nav-link text-black fw-bold"
+						className={getLinkClass('/viewer')}
 						onClick={clickHandler}
 					>
-						Json Viewer
+						JSON Editor
 					</Link>
 					<Link
 						to="/jsonDiff"
-						className="nav-link fw-bold"
+						className={getLinkClass('/jsonDiff')}
 						onClick={clickHandler}
 					>
-						Json Diff
+						JSON Diff
 					</Link>
 
 					<Link
 						to="/dashboard"
-						className="nav-link fw-bold"
+						className={getLinkClass('/dashboard')}
 						onClick={clickHandler}
 					>
 						Data Dashboard
@@ -75,15 +91,29 @@ function AppDrawer({ show, onHide, onItemClick }) {
 
 					<Link
 						to="/format"
-						className="nav-link fw-bold"
+						className={getLinkClass('/format')}
 						onClick={clickHandler}
 					>
 						Code Formatter
 					</Link>
 
-					{userSettings.value.current_screen === '/viewer' && (
-						<JsonViewerThemes />
-					)}
+					<Link
+						to="/json-model-generator"
+						className={getLinkClass('/json-model-generator')}
+						onClick={clickHandler}
+					>
+						JSON Model Generator
+					</Link>
+
+					<Link
+						to="/url-manipulator"
+						className={getLinkClass('/url-manipulator')}
+						onClick={clickHandler}
+					>
+						URL Manipulator
+					</Link>
+
+					{currentScreen === '/viewer' && <JsonViewerThemes />}
 				</Nav>
 			</Offcanvas.Body>
 		</Offcanvas>

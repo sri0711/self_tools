@@ -33,7 +33,6 @@ function JsonTable({
 		return data && data.length > 0 ? Object.keys(data[0]) : [];
 	}, [data]);
 
-	// Slice first to prevent browser memory crash on massive data
 	const paginatedChunk = useMemo(() => {
 		if (!data || data.length === 0) return [];
 		if (serverPagination) return data;
@@ -73,7 +72,7 @@ function JsonTable({
 			setSortField(column);
 			setSortDirection('asc');
 		}
-		handlePageChange(1); // Reset to first page on sort
+		handlePageChange(1);
 	};
 
 	return (

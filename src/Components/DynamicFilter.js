@@ -12,14 +12,12 @@ const MAX_TOGGLE_OPTIONS = 7;
 const MAX_DROPDOWN_OPTIONS = 15;
 const MAX_SEARCHABLE_OPTIONS = 1000;
 
-// ---------------- META ----------------
 function getFieldMeta(data) {
 	const meta = {};
 	if (!data || !data.length) return meta;
 
 	const fields = Object.keys(data[0]);
 
-	// Sample limit to prevent UI freeze on huge datasets
 	const sampleSize = Math.min(data.length, 5000);
 
 	fields.forEach((field) => {
@@ -56,7 +54,7 @@ function getFieldMeta(data) {
 				!allDates &&
 				uniqueSet.size > MAX_SEARCHABLE_OPTIONS
 			) {
-				break; // early exit
+				break;
 			}
 		}
 
@@ -80,7 +78,6 @@ function getFieldMeta(data) {
 	return meta;
 }
 
-// ---------------- FILTER FACTORY ----------------
 function createFilter() {
 	return {
 		id: Date.now() + Math.random(),
@@ -98,7 +95,6 @@ function createFilter() {
 	};
 }
 
-// ---------------- COMPONENT ----------------
 function DynamicFilter({
 	data,
 	onFiltered,
@@ -116,7 +112,6 @@ function DynamicFilter({
 	useEffect(() => {
 		if (!onFiltered || !data) return;
 
-		// ✅ preprocess filters ONCE
 		const preparedFilters = filters.map((f) => ({
 			...f,
 			textLower: f.text.trim().toLowerCase(),
@@ -135,7 +130,6 @@ function DynamicFilter({
 			const rawValue = row[filter.field];
 			const value = rawValue != null ? rawValue : '';
 
-			// NUMBER
 			if (filter.type === 'number') {
 				const num = parseFloat(value);
 				if (Number.isNaN(num)) return false;
@@ -148,7 +142,6 @@ function DynamicFilter({
 				return true;
 			}
 
-			// DATE
 			if (filter.type === 'date') {
 				const dateValue = Date.parse(String(value));
 				if (Number.isNaN(dateValue)) return false;
@@ -161,7 +154,6 @@ function DynamicFilter({
 				return true;
 			}
 
-			// DROPDOWN
 			if (filter.type === 'dropdown') {
 				if (meta.count > MAX_SEARCHABLE_OPTIONS) {
 					if (!filter.textLower) return true;
@@ -175,7 +167,6 @@ function DynamicFilter({
 				return String(value) === String(filter.dropdown);
 			}
 
-			// TOGGLE
 			if (filter.type === 'toggle') {
 				if (meta.count > MAX_TOGGLE_OPTIONS) {
 					if (!filter.textLower) return true;
@@ -196,13 +187,11 @@ function DynamicFilter({
 				return filter.toggleValues.includes(String(value));
 			}
 
-			// TEXT
 			if (!filter.textLower) return true;
 
 			return String(value).toLowerCase().includes(filter.textLower);
 		};
 
-		// ✅ Check if any filters are active. If none, bypass processing immediately
 		const hasActiveFilters = preparedFilters.some((f) => f.field);
 
 		if (!hasActiveFilters) {
@@ -297,7 +286,7 @@ function DynamicFilter({
 			} else {
 				let resultArr = [];
 				for (let i = 0; i < data.length; i += CHUNK_SIZE) {
-					if (isCancelled) return; // Prevent overlapping runs if user keeps typing
+					if (isCancelled) return;
 
 					const chunk = data.slice(i, i + CHUNK_SIZE);
 					const filteredChunk = chunk.filter((row) => {
@@ -315,7 +304,6 @@ function DynamicFilter({
 					});
 
 					resultArr.push(...filteredChunk);
-					// Yield to the browser event loop to prevent "Aw Snap!" crash
 					await new Promise((resolve) => setTimeout(resolve, 0));
 					setFilterProgress(
 						Math.round(
@@ -485,7 +473,7 @@ function DynamicFilter({
 									dropdownSearch: e.target.value
 								})
 							}
-							onClick={(e) => e.stopPropagation()} // Prevent dropdown from closing while typing
+							onClick={(e) => e.stopPropagation()}
 							autoFocus
 						/>
 						{filter.dropdown && (

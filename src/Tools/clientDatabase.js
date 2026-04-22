@@ -27,7 +27,7 @@ export const initDB = () => {
 		};
 
 		request.onerror = (event) => {
-			dbPromise = null; // Reset on error
+			dbPromise = null;
 			reject(event.target.error);
 		};
 	});
@@ -107,7 +107,7 @@ export const storeChunkedData = async (baseId, dataArray, onProgress) => {
 			await putChunk(db, baseId, i, chunkData);
 
 			if (onProgress) onProgress(Math.round(((i + 1) / chunks) * 100));
-			await new Promise((r) => setTimeout(r, 10)); // Yield to keep UI smooth
+			await new Promise((r) => setTimeout(r, 10));
 		}
 		return true;
 	} catch (err) {
@@ -133,7 +133,7 @@ export const retrieveChunkedData = async (baseId, onProgress) => {
 			fullData = fullData.concat(chunk);
 			if (onProgress)
 				onProgress(Math.round(((i + 1) / meta.chunks) * 100));
-			await new Promise((r) => setTimeout(r, 10)); // Yield
+			await new Promise((r) => setTimeout(r, 10));
 		}
 		return fullData;
 	} catch (err) {

@@ -6,6 +6,8 @@ import { ReactComponent as ViewerIcon } from '../images/viewer-icon.svg';
 import { ReactComponent as DiffIcon } from '../images/diff-icon.svg';
 import { ReactComponent as DashboardIcon } from '../images/dashboard-icon.svg';
 import { ReactComponent as FormatIcon } from '../images/format-icon.svg';
+import { ReactComponent as ModelIcon } from '../images/model-icon.svg';
+import { ReactComponent as UrlIcon } from '../images/url-icon.svg';
 import ParticleNetwork from '../Components/ParticleNetwork';
 import PackageJson from '../../package.json';
 
@@ -25,39 +27,41 @@ function FeatureCardItem({ feat, dispatch }) {
 		<Card
 			ref={cardRef}
 			onMouseMove={handleMouseMove}
-			className="feature-card text-light text-center p-3 rounded-4"
+			className="feature-card text-light text-center p-4 w-100 h-100"
 			style={{
 				'--card-color': feat.color,
-				'--card-color-glow': `${feat.color}25`
+				'--card-color-glow': `${feat.color}40`
 			}}
 		>
-			<Card.Body className="d-flex flex-column">
+			<Card.Body className="d-flex flex-column p-0">
 				<div
-					className="mb-4"
+					className="icon-wrapper mb-5 mt-4 mx-auto d-flex align-items-center justify-content-center"
 					style={{
 						color: feat.color,
 						filter: `drop-shadow(0 0 12px ${feat.color}40)`
 					}}
 				>
-					{feat.icon}
+					<div>{feat.icon}</div>
 				</div>
-				<Card.Title className="fw-bold mb-3">{feat.title}</Card.Title>
-				<Card.Text className="text-secondary mb-4 small">
+				<Card.Title className="fw-bolder mb-3 fs-4 text-uppercase feature-card-title">
+					{feat.title}
+				</Card.Title>
+				<Card.Text className="mb-4 lh-lg flex-grow-1 feature-card-desc">
 					{feat.desc}
 				</Card.Text>
 				<Button
-					className="mt-auto rounded-pill feature-btn"
+					className="mt-auto feature-btn py-2 fw-bold w-100"
 					href={`#${feat.path}`}
 					onClick={() => dispatch(setCurrentScreen(feat.path))}
 				>
-					Launch Tool
+					[ LAUNCH ]
 				</Button>
 			</Card.Body>
 		</Card>
 	);
 }
 
-function Home() {
+function Home({ onMenuClick }) {
 	const dispatch = useDispatch();
 
 	const features = [
@@ -92,42 +96,97 @@ function Home() {
 			icon: <FormatIcon width="48" height="48" />,
 			path: '/format',
 			color: '#a78bfa'
+		},
+		{
+			id: 'JSONModelGenerator',
+			title: 'JSON Model Generator',
+			desc: 'Generate data models, schemas, interfaces, or classes instantly from your JSON payloads.',
+			icon: <ModelIcon width="48" height="48" />,
+			path: '/json-model-generator',
+			color: '#d60101'
+		},
+		{
+			id: 'URLManipulator',
+			title: 'URL Manipulator',
+			desc: 'Manipulate, test, and generate URLs with ease. Export your configured requests to various programming languages.',
+			icon: <UrlIcon width="48" height="48" />,
+			path: '/url-manipulator',
+			color: '#ec4899'
 		}
 	];
 
 	return (
-		<div className="landing-page-wrapper min-vh-100 py-5 d-flex align-items-center">
+		<div className="landing-page-wrapper min-vh-100">
 			<ParticleNetwork />
-			<Container>
-				<Row className="text-center mb-5">
-					<Col>
-						<Badge
-							bg="transparent"
-							className="hero-badge mb-4 px-3 py-2 rounded-pill"
-						>
-							v{PackageJson.version} • Developer Toolkit
-						</Badge>
-						<h1 className="hero-title mb-3">Self Tools</h1>
-						<p
-							className="lead col-lg-8 mx-auto mb-4 fs-5"
-							style={{ color: '#cbd5e1' }}
-						>
-							A blazing-fast, client-side utility suite built for
-							modern developers. Analyze payloads, format code,
-							and manipulate massive datasets without ever sending
-							your data to a server.
-						</p>
-					</Col>
-				</Row>
 
-				<Row className="g-4">
-					{features.map((feat) => (
-						<Col md={6} lg={3} key={feat.id}>
-							<FeatureCardItem feat={feat} dispatch={dispatch} />
+			{/* Hero Section */}
+			<div className="min-vh-100 d-flex flex-column justify-content-center align-items-center pt-5">
+				<Container>
+					<Row className="text-center">
+						<Col>
+							<Badge
+								bg="transparent"
+								className="hero-badge mb-4 px-4 py-2 fs-6 fade-in-up delay-1"
+							>
+								<span className="hero-badge-text">
+									SYS.INIT // v{PackageJson.version}
+								</span>
+							</Badge>
+
+							{/* Wrapped in a div to prevent WebKit background-clip opacity bug */}
+							<div className="fade-in-up delay-2">
+								<h1 className="hero-title mb-4">Self Tools</h1>
+							</div>
+
+							<p className="lead col-lg-7 mx-auto mb-4 fs-5 lh-lg fade-in-up delay-3 hero-desc">
+								A blazing-fast client-side toolkit for modern
+								developers. Analyze payloads, format code, and
+								manipulate massive datasets completely locally.
+							</p>
+
+							<div
+								className="d-flex flex-wrap justify-content-center gap-3 mb-5 fade-in-up delay-3 font-monospace small"
+								style={{ color: '#38bdf8', opacity: 0.9 }}
+							>
+								<span>[ 🔒 ZERO SERVER CALLS ]</span>
+								<span>[ 🚀 CONSTANTLY EXPANDING ]</span>
+							</div>
+
+							<div className="scroll-indicator mt-5 opacity-100 fade-in-up delay-4">
+								<div className="fs-4 text-uppercase mb-2 scroll-text">
+									SCROLL_TO_ACCESS
+								</div>
+								<div className="fs-3 scroll-arrow">↓</div>
+							</div>
 						</Col>
-					))}
-				</Row>
-			</Container>
+					</Row>
+				</Container>
+			</div>
+
+			{/* Features Section */}
+			<div className="py-5">
+				<Container>
+					<Row className="g-4 justify-content-center pb-5">
+						{features.map((feat, index) => (
+							<Col
+								xs={12}
+								md={6}
+								lg={3}
+								className="d-flex fade-in-up"
+								style={{
+									animationDelay: `${400 + index * 150}ms`
+								}}
+								key={feat.id}
+							>
+								<FeatureCardItem
+									feat={feat}
+									dispatch={dispatch}
+								/>
+							</Col>
+						))}
+					</Row>
+				</Container>
+			</div>
 		</div>
 	);
 }

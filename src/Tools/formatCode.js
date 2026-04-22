@@ -62,7 +62,6 @@ export async function formatCodeWithPrettier(code, language, editorRef) {
 
 	const config = prettierConfig[language];
 	if (!config) {
-		// Fallback to Monaco for unsupported languages
 		return formatCodeWithMonaco(code, editorRef);
 	}
 

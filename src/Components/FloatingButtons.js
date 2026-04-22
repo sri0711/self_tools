@@ -1,11 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { Button, Image } from 'react-bootstrap';
-import save from '../images/save.png';
+import { Button } from 'react-bootstrap';
 import { setJson1DiffData, setJson2DiffData } from '../redux/diffHandler';
 import { setJsonData } from '../redux/JsonHandler';
 import { setFileHandlerModal } from '../redux/userSettings';
 
-function FloatingButtons({ onMenuClick }) {
+function FloatingButtons() {
 	const userSetting = useSelector((state) => state.user_settings.value);
 	const dispatch = useDispatch();
 
@@ -45,62 +44,63 @@ function FloatingButtons({ onMenuClick }) {
 			{userSetting.current_screen === '/jsonDiff' && (
 				<>
 					<Button
-						variant="dark"
-						className="floatingMenuButton diffButton_1"
+						className="hud-action-pill position-fixed"
+						style={{
+							bottom: '40px',
+							left: '25%',
+							transform: 'translateX(-50%)',
+							'--btn-glow': '#34d399'
+						}}
 						onClick={(e) => handleValuePaste(e, 1)}
 					>
-						<Image
-							src={save}
-							alt="Save"
-							style={{ width: '20px' }}
-						/>
+						📋 [ PASTE LEFT ]
 					</Button>
 					<Button
-						variant="dark"
-						className="floatingMenuButton diffButton_2"
+						className="hud-action-pill position-fixed"
+						style={{
+							bottom: '40px',
+							left: '75%',
+							transform: 'translateX(-50%)',
+							'--btn-glow': '#34d399'
+						}}
 						onClick={(e) => handleValuePaste(e, 2)}
 					>
-						<Image
-							src={save}
-							alt="Save"
-							style={{ width: '20px' }}
-						/>
+						📋 [ PASTE RIGHT ]
 					</Button>
 				</>
 			)}
 			{userSetting.current_screen === '/viewer' && (
 				<Button
-					className="floatingMenuButton diffButton_2"
+					className="hud-action-pill position-fixed"
+					style={{
+						bottom: '40px',
+						left: '50%',
+						transform: 'translateX(-50%)',
+						'--btn-glow': '#38bdf8'
+					}}
 					onClick={handlePasteValueForJsonEditor}
-					aria-label="Edit"
-					title="Edit"
+					aria-label="Paste JSON"
+					title="Paste JSON"
 				>
-					<Image src={save} alt="Save" style={{ width: '20px' }} />
+					📋 [ PASTE JSON ]
 				</Button>
 			)}
 
 			{userSetting.current_screen === '/dashboard' && (
 				<Button
-					className="floatingMenuButton diffButton_2"
+					className="hud-action-pill position-fixed"
+					style={{
+						bottom: '40px',
+						left: '50%',
+						transform: 'translateX(-50%)',
+						'--btn-glow': '#fbbf24'
+					}}
 					onClick={openFileHandlerModal}
-					aria-label="Edit"
-					title="Edit"
+					aria-label="Data Source"
+					title="Data Source"
 				>
-					<span style={{ fontSize: '1.5rem', lineHeight: 1 }}>
-						📝
-					</span>
+					📝 [ UPLOAD DATA ]
 				</Button>
-			)}
-
-			{userSetting.current_screen !== '/' && (
-				<button
-					className="floatingMenuButton"
-					onClick={onMenuClick}
-					aria-label="Open menu"
-					title="Open menu"
-				>
-					☰
-				</button>
 			)}
 		</>
 	);
