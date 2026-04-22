@@ -5,7 +5,7 @@ import React, {
 	useRef,
 	useState
 } from 'react';
-import { Button, Form, Dropdown } from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
 import Editor from '@monaco-editor/react';
 import detectLanguage from '../Tools/detectLanguage';
 import { formatCodeWithPrettier } from '../Tools/formatCode';
@@ -34,7 +34,7 @@ const availableLanguages = [
 	'php'
 ];
 
-function Formatter() {
+function Formatter({ onMenuClick }) {
 	const [code, setCode] = useState('');
 	const [language, setLanguage] = useState('javascript');
 	const [autoDetect, setAutoDetect] = useState(true);
@@ -92,104 +92,126 @@ function Formatter() {
 			formatOnType: true,
 			scrollBeyondLastLine: false,
 			renderWhitespace: 'none',
-			cursorBlinking: 'smooth'
+			cursorBlinking: 'smooth',
+			padding: { top: 16, bottom: 16 }
 		}),
 		[]
 	);
 
 	return (
-		<div className="p-3 min-vh-100 bg-dark text-light">
-			<div className="mb-3">
-				<h2 className="mb-2">Code Formatter</h2>
-				<p className="mb-0">
-					Auto detect language as you type or paste, with syntax
-					highlighting, completion, and dark theme.
-				</p>
-			</div>
-
-			<div className="d-flex flex-wrap align-items-center gap-3 mb-3">
-				<div className="d-flex flex-column">
-					<Form.Label className="small mb-1">Language</Form.Label>
-					<Dropdown>
-						<Dropdown.Toggle
-							variant="outline-secondary"
-							className="text-light text-capitalize"
-							style={{ minWidth: '120px' }}
-						>
-							{language}
-						</Dropdown.Toggle>
-
-						<Dropdown.Menu
-							variant="dark"
-							style={{ maxHeight: '250px', overflowY: 'auto' }}
+		<div className="p-4 tool-page-bg theme-purple d-flex flex-column min-vh-100">
+			<div className="glass-panel p-3 mb-4 d-flex flex-wrap align-items-center gap-4 border-0">
+				<div className="d-flex align-items-center gap-4">
+					<div
+						className="response-badge"
+						style={{ padding: '0.25rem 1rem' }}
+					>
+						<label>LANG</label>
+						<Form.Select
+							value={language}
+							onChange={(e) =>
+								handleLanguageSelect(e.target.value)
+							}
+							className="bg-transparent border-0 text-light fw-bold font-monospace text-uppercase"
+							style={{
+								outline: 'none',
+								boxShadow: 'none',
+								cursor: 'pointer'
+							}}
 						>
 							{availableLanguages.map((lang) => (
-								<Dropdown.Item
+								<option
 									key={lang}
-									active={lang === language}
-									className="text-capitalize"
-									onClick={() => handleLanguageSelect(lang)}
+									value={lang}
+									style={{ background: '#0f172a' }}
 								>
 									{lang}
-								</Dropdown.Item>
+								</option>
 							))}
-						</Dropdown.Menu>
-					</Dropdown>
-				</div>
+						</Form.Select>
+					</div>
 
-				<div className="d-flex align-items-center gap-2">
 					<Form.Check
-						type="checkbox"
+						type="switch"
 						id="autoDetect"
-						label="Auto detect"
+						label="AUTO DETECT"
 						checked={autoDetect}
 						onChange={(e) => setAutoDetect(e.target.checked)}
-						className="text-light mb-0"
+						className="hud-switch font-monospace mb-0"
+						style={{ letterSpacing: '1px' }}
 					/>
 				</div>
 
-				<Button variant="primary" onClick={handleFormat}>
-					Format code
-				</Button>
-
-				<div className="small">
-					Detected: <strong>{detectedLanguage}</strong>
+				<div className="response-badge text-info ms-auto">
+					<label>DETECTED</label>
+					<span style={{ color: '#a78bfa' }}>
+						{detectedLanguage.toUpperCase()}
+					</span>
 				</div>
+
+				<Button
+					variant="none"
+					className="hud-btn-primary fw-bold px-4 py-2"
+					onClick={handleFormat}
+				>
+					[ FORMAT CODE ]
+				</Button>
+				<Button
+					variant="none"
+					className="hud-btn-secondary fw-bold px-4 py-2"
+					onClick={onMenuClick}
+				>
+					[ ☰ MENU ]
+				</Button>
 			</div>
 
-			<div className="rounded overflow-hidden border border-secondary">
-				<Editor
-					height="72vh"
-					language={language}
-					value={code}
-					onChange={handleCodeChange}
-					beforeMount={(monaco) => {
-						monaco.editor.defineTheme('myDarkTheme', {
-							base: 'vs-dark',
-							inherit: true,
-							rules: [],
-							colors: {
-								'editor.background': '#0b1220',
-								'editor.foreground': '#f8fafc'
-							}
-						});
+			<div className="glass-panel flex-grow-1 p-0 overflow-hidden d-flex flex-column border-0">
+				<div
+					className="px-3 py-2 border-bottom"
+					style={{
+						borderColor: 'rgba(56, 189, 248, 0.1)',
+						background: 'rgba(255, 255, 255, 0.02)'
 					}}
-					theme="myDarkTheme"
-					options={editorOptions}
-					onMount={(editor) => {
-						handleEditorMount(editor);
-						if (editor.onDidPaste) {
-							editor.onDidPaste(() => {
-								if (autoDetectRef.current) {
-									const nextValue = editor.getValue();
-									const detected = detectLanguage(nextValue);
-									setDetectedLanguage(detected);
-									setLanguage(detected);
+				>
+					<span className="font-monospace text-secondary small">
+						INPUT_STREAM // {language.toUpperCase()}
+					</span>
+				</div>
+				<div className="flex-grow-1 mt-2 w-100">
+					<Editor
+						height="calc(100vh - 230px)"
+						language={language}
+						value={code}
+						onChange={handleCodeChange}
+						beforeMount={(monaco) => {
+							monaco.editor.defineTheme('myDarkTheme', {
+								base: 'vs-dark',
+								inherit: true,
+								rules: [],
+								colors: {
+									'editor.background': '#0f172a',
+									'editor.foreground': '#f8fafc'
 								}
 							});
-						}
-					}}
-				/>
+						}}
+						theme="myDarkTheme"
+						options={editorOptions}
+						onMount={(editor) => {
+							handleEditorMount(editor);
+							if (editor.onDidPaste) {
+								editor.onDidPaste(() => {
+									if (autoDetectRef.current) {
+										const nextValue = editor.getValue();
+										const detected =
+											detectLanguage(nextValue);
+										setDetectedLanguage(detected);
+										setLanguage(detected);
+									}
+								});
+							}
+						}}
+					/>
+				</div>
 			</div>
 		</div>
 	);

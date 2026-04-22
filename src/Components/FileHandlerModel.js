@@ -71,7 +71,6 @@ function FileHandlerModel() {
 		setProgress(0);
 		setStatusText('Parsing file...');
 
-		// Yield control back to the browser so the loading spinner can render
 		await new Promise((resolve) => setTimeout(resolve, 50));
 
 		try {
@@ -101,7 +100,6 @@ function FileHandlerModel() {
 		const isArray = Array.isArray(data);
 		const previewLimit = 100;
 
-		// Render only the first 50 rows to prevent the browser from crashing (Aw, Snap!)
 		const previewData = isArray ? data.slice(0, previewLimit) : data;
 		const jsonString = JSON.stringify(previewData, null, 2);
 
@@ -121,7 +119,6 @@ function FileHandlerModel() {
 		const dataToImport = parsedData[selectedSheet];
 		const isArray = Array.isArray(dataToImport);
 
-		// Store in IndexedDB to avoid Redux crashing on huge payloads
 		if (isArray) {
 			await storeChunkedData(
 				'dashboard_active_sheet',

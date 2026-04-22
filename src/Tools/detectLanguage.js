@@ -7,9 +7,7 @@ export default function detectLanguage(code) {
 		try {
 			JSON.parse(text);
 			return 'json';
-		} catch {
-			// ignore invalid JSON
-		}
+		} catch {}
 	}
 
 	if (/^---/.test(text) && /:\s*\w+|^\s*-\s+\w+/m.test(text)) return 'yml';

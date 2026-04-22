@@ -8,10 +8,11 @@ const ParticleNetwork = () => {
 		const ctx = canvas.getContext('2d');
 		let animationFrameId;
 		let particles = [];
+		let hue = 0;
 
 		const initParticles = () => {
 			particles = [];
-			// Responsive amount of particles based on screen size
+
 			const numParticles = Math.floor(
 				(canvas.width * canvas.height) / 12000
 			);
@@ -19,8 +20,8 @@ const ParticleNetwork = () => {
 				particles.push({
 					x: Math.random() * canvas.width,
 					y: Math.random() * canvas.height,
-					vx: (Math.random() - 0.5) * 0.6, // Velocity X
-					vy: (Math.random() - 0.5) * 0.6, // Velocity Y
+					vx: (Math.random() - 0.5) * 0.9,
+					vy: (Math.random() - 0.5) * 0.9,
 					radius: Math.random() * 1.5 + 0.5
 				});
 			}
@@ -35,22 +36,21 @@ const ParticleNetwork = () => {
 		const draw = () => {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+			hue += 0.2;
+
 			for (let i = 0; i < particles.length; i++) {
 				let p = particles[i];
 				p.x += p.vx;
 				p.y += p.vy;
 
-				// Bounce off walls
 				if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
 				if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
 
-				// Draw Particle
 				ctx.beginPath();
 				ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-				ctx.fillStyle = 'rgba(56, 189, 248, 0.6)';
+				ctx.fillStyle = `hsla(${hue}, 90%, 60%, 0.6)`;
 				ctx.fill();
 
-				// Connect Particles
 				for (let j = i + 1; j < particles.length; j++) {
 					let p2 = particles[j];
 					let dx = p.x - p2.x;
@@ -61,8 +61,8 @@ const ParticleNetwork = () => {
 						ctx.beginPath();
 						ctx.moveTo(p.x, p.y);
 						ctx.lineTo(p2.x, p2.y);
-						ctx.strokeStyle = `rgba(167, 139, 250, ${1 - dist / 130})`;
-						ctx.lineWidth = 0.8;
+						ctx.strokeStyle = `hsla(${(hue + 45) % 360}, 80%, 65%, ${1 - dist / 130})`;
+						ctx.lineWidth = 1;
 						ctx.stroke();
 					}
 				}
@@ -84,7 +84,7 @@ const ParticleNetwork = () => {
 		<canvas
 			ref={canvasRef}
 			style={{
-				position: 'absolute',
+				position: 'fixed',
 				top: 0,
 				left: 0,
 				width: '100%',
