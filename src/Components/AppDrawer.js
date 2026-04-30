@@ -11,7 +11,8 @@ const availableScreens = {
 	'/format': 'Code Formatter',
 	'/viewer': 'JSON Editor',
 	'/url-manipulator': 'URL Manipulator',
-	'/json-model-generator': 'JSON Model Generator'
+	'/json-model-generator': 'JSON Model Generator',
+	'/json-analyser': 'JSON Analyser'
 };
 
 const screenThemes = {
@@ -21,7 +22,8 @@ const screenThemes = {
 	'/format': 'theme-purple',
 	'/viewer': 'theme-cyan',
 	'/url-manipulator': 'theme-pink',
-	'/json-model-generator': 'theme-red'
+	'/json-model-generator': 'theme-red',
+	'/json-analyser': 'theme-orange'
 };
 
 function AppDrawer({ show, onHide, onItemClick }) {

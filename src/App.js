@@ -18,6 +18,14 @@ import Viewer from './pages/Viewer';
 import NotFound from './pages/NotFound';
 import URLManipulator from './pages/URLManipulator';
 import JSONModelGenerator from './pages/JSONModelGenerator';
+import JsonAnalyzer from './pages/JsonAnalyzer';
+import viewerIconUrl from './images/viewer-icon.svg';
+import diffIconUrl from './images/diff-icon.svg';
+import dashboardIconUrl from './images/dashboard-icon.svg';
+import formatIconUrl from './images/format-icon.svg';
+import modelIconUrl from './images/model-icon.svg';
+import urlIconUrl from './images/url-icon.svg';
+import analyzeIconUrl from './images/analyze-icon.svg';
 
 function PageTitleUpdater() {
 	const location = useLocation();
@@ -30,9 +38,28 @@ function PageTitleUpdater() {
 			'/jsonDiff': 'JSON Diff | Self Tools',
 			'/viewer': 'JSON Editor | Self Tools',
 			'/url-manipulator': 'URL Manipulator | Self Tools',
-			'/json-model-generator': 'JSON Model Generator | Self Tools'
+			'/json-model-generator': 'JSON Model Generator | Self Tools',
+			"/json-analyser": "JSON Analyser | Self Tools"
 		};
 		document.title = titles[location.pathname] || 'Not Found | Self Tools';
+
+		const icons = {
+			'/dashboard': dashboardIconUrl,
+			'/format': formatIconUrl,
+			'/jsonDiff': diffIconUrl,
+			'/viewer': viewerIconUrl,
+			'/url-manipulator': urlIconUrl,
+			'/json-model-generator': modelIconUrl,
+			'/json-analyser': analyzeIconUrl
+		};
+
+		let link = document.querySelector("link[rel~='icon']");
+		if (!link) {
+			link = document.createElement('link');
+			link.rel = 'icon';
+			document.head.appendChild(link);
+		}
+		link.href = icons[location.pathname] || '/favicon.ico';
 	}, [location]);
 
 	return null;
@@ -93,18 +120,41 @@ function App() {
 
 			<div className="vw-100 p-0 m-0">
 				<Routes>
-					<Route path="/" element={<Home onMenuClick={handleMenuClick} />} />
-					<Route path="/dashboard" element={<DashBoard onMenuClick={handleMenuClick} />} />
-					<Route path="/format" element={<Formatter onMenuClick={handleMenuClick} />} />
-					<Route path="/jsonDiff" element={<JsonDiff onMenuClick={handleMenuClick} />} />
+					<Route
+						path="/"
+						element={<Home onMenuClick={handleMenuClick} />}
+					/>
+					<Route
+						path="/dashboard"
+						element={<DashBoard onMenuClick={handleMenuClick} />}
+					/>
+					<Route
+						path="/format"
+						element={<Formatter onMenuClick={handleMenuClick} />}
+					/>
+					<Route
+						path="/jsonDiff"
+						element={<JsonDiff onMenuClick={handleMenuClick} />}
+					/>
 					<Route
 						path="/url-manipulator"
-						element={<URLManipulator onMenuClick={handleMenuClick} />}
+						element={
+							<URLManipulator onMenuClick={handleMenuClick} />
+						}
 					/>
-					<Route path="/viewer" element={<Viewer onMenuClick={handleMenuClick} />} />
+					<Route
+						path="/viewer"
+						element={<Viewer onMenuClick={handleMenuClick} />}
+					/>
 					<Route
 						path="/json-model-generator"
-						element={<JSONModelGenerator onMenuClick={handleMenuClick} />}
+						element={
+							<JSONModelGenerator onMenuClick={handleMenuClick} />
+						}
+					/>
+					<Route
+						path="/json-analyser"
+						element={<JsonAnalyzer onMenuClick={handleMenuClick} />}
 					/>
 					<Route path="*" element={<NotFound />} />
 				</Routes>

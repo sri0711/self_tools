@@ -4,10 +4,11 @@ import { setCurrentScreen } from '../redux/userSettings';
 import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap';
 import { ReactComponent as ViewerIcon } from '../images/viewer-icon.svg';
 import { ReactComponent as DiffIcon } from '../images/diff-icon.svg';
-import { ReactComponent as DashboardIcon } from '../images/dashboard-icon.svg';
-import { ReactComponent as FormatIcon } from '../images/format-icon.svg';
 import { ReactComponent as ModelIcon } from '../images/model-icon.svg';
 import { ReactComponent as UrlIcon } from '../images/url-icon.svg';
+import { ReactComponent as DashboardIcon } from '../images/dashboard-icon.svg';
+import { ReactComponent as FormatIcon } from '../images/format-icon.svg';
+import { ReactComponent as AnalyzeIcon } from '../images/analyze-icon.svg';
 import ParticleNetwork from '../Components/ParticleNetwork';
 import PackageJson from '../../package.json';
 
@@ -103,7 +104,7 @@ function Home({ onMenuClick }) {
 			desc: 'Generate data models, schemas, interfaces, or classes instantly from your JSON payloads.',
 			icon: <ModelIcon width="48" height="48" />,
 			path: '/json-model-generator',
-			color: '#d60101'
+			color: '#ef4444'
 		},
 		{
 			id: 'URLManipulator',
@@ -112,6 +113,14 @@ function Home({ onMenuClick }) {
 			icon: <UrlIcon width="48" height="48" />,
 			path: '/url-manipulator',
 			color: '#ec4899'
+		},
+		{
+			id: 'JSONAnalyser',
+			title: 'JSON Analyser',
+			desc: 'Visually build data pipelines using a no-code block interface to dynamically map, filter, reduce, and manipulate JSON payloads.',
+			icon: <AnalyzeIcon width="48" height="48" />,
+			path: '/json-analyser',
+			color: '#f97316'
 		}
 	];
 

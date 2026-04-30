@@ -558,9 +558,21 @@
 	--theme-grid: rgba(236, 72, 153, 0.02);
 }
 .theme-red {
-	--theme-color: #d60101;
-	--theme-glow: rgba(214, 1, 1, 0.12);
-	--theme-grid: rgba(214, 1, 1, 0.02);
+	--theme-color: #ef4444;
+	--theme-glow: rgba(239, 68, 68, 0.12);
+	--theme-grid: rgba(239, 68, 68, 0.02);
+}
+
+.theme-orange {
+	--theme-color: #f97316;
+	--theme-glow: rgba(249, 115, 22, 0.12);
+	--theme-grid: rgba(249, 115, 22, 0.02);
+}
+
+.theme-dark-purple {
+	--theme-color: #9f2aff;
+	--theme-glow: rgba(159, 41, 255, 0.12);
+	--theme-grid: rgba(159, 41, 255, 0.02);
 }
 
 /* --- Shared Tool Page Background --- */

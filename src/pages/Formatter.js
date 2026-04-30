@@ -5,7 +5,7 @@ import React, {
 	useRef,
 	useState
 } from 'react';
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, Modal } from 'react-bootstrap';
 import Editor from '@monaco-editor/react';
 import detectLanguage from '../Tools/detectLanguage';
 import { formatCodeWithPrettier } from '../Tools/formatCode';
@@ -41,6 +41,7 @@ function Formatter({ onMenuClick }) {
 	const [detectedLanguage, setDetectedLanguage] = useState('javascript');
 	const editorRef = useRef(null);
 	const autoDetectRef = useRef(autoDetect);
+	const [alertMsg, setAlertMsg] = useState('');
 
 	useEffect(() => {
 		autoDetectRef.current = autoDetect;
@@ -78,7 +79,7 @@ function Formatter({ onMenuClick }) {
 			editorRef.current.setValue(formatted);
 		} catch (error) {
 			console.error('Format error:', error);
-			alert('Formatting failed. Please check your code syntax.');
+			setAlertMsg('Formatting failed. Please check your code syntax.');
 		}
 	}, [code, language]);
 
@@ -213,6 +214,53 @@ function Formatter({ onMenuClick }) {
 					/>
 				</div>
 			</div>
+
+			<Modal
+				show={!!alertMsg}
+				onHide={() => setAlertMsg('')}
+				centered
+				contentClassName="bg-transparent border-0"
+			>
+				<div
+					className="glass-panel"
+					style={{ border: '1px solid rgba(167, 139, 250, 0.5)' }}
+				>
+					<div
+						className="p-3 border-bottom d-flex justify-content-between align-items-center"
+						style={{ borderColor: 'rgba(167, 139, 250, 0.2)' }}
+					>
+						<span
+							className="font-monospace small fw-bold"
+							style={{ color: '#a78bfa' }}
+						>
+							SYSTEM_ALERT // NOTICE
+						</span>
+						<Button
+							variant="none"
+							className="p-0 m-0 fs-5 lh-1"
+							onClick={() => setAlertMsg('')}
+							style={{ border: 'none', color: '#a78bfa' }}
+						>
+							&times;
+						</Button>
+					</div>
+					<div className="p-4 text-light font-monospace fs-6">
+						{alertMsg}
+					</div>
+					<div
+						className="p-3 border-top text-end"
+						style={{ borderColor: 'rgba(167, 139, 250, 0.2)' }}
+					>
+						<Button
+							variant="none"
+							className="hud-btn-secondary fw-bold"
+							onClick={() => setAlertMsg('')}
+						>
+							[ ACKNOWLEDGE ]
+						</Button>
+					</div>
+				</div>
+			</Modal>
 		</div>
 	);
 }

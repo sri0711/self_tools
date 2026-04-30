@@ -658,6 +658,7 @@ function DynamicFilter({
 								fontWeight: 'bold',
 								fontSize: '14px'
 							}}
+							className="custom-progress-bar w-50"
 						/>
 
 						{isFiltering && (
@@ -687,6 +688,7 @@ function DynamicFilter({
 								fontWeight: 'bold',
 								fontSize: '14px'
 							}}
+							className="custom-progress-bar"
 						/>
 					</div>
 				)}
