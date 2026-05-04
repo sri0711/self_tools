@@ -1,0 +1,287 @@
+/* --- Landing Page Styles --- */
+.landing-page-wrapper {
+	background-color: #020617;
+	background-image:
+		radial-gradient(circle at 50% 0%, #1e1b4b 0%, transparent 80%),
+		linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+	background-size:
+		100% 100%,
+		40px 40px,
+		40px 40px;
+	background-position:
+		center top,
+		center center,
+		center center;
+	color: #f8fafc;
+	position: relative;
+	overflow: hidden;
+}
+
+.landing-page-wrapper > * {
+	position: relative;
+	z-index: 1;
+}
+
+@keyframes textShine {
+	0% {
+		background-position: 0% 50%;
+	}
+	100% {
+		background-position: 200% 50%;
+	}
+}
+
+/* --- Smooth Entrance Animations --- */
+@keyframes fadeInUpSoft {
+	0% {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.fade-in-up {
+	animation: fadeInUpSoft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+	opacity: 0;
+}
+
+/* Delays for the stagger effect */
+.delay-1 {
+	animation-delay: 100ms;
+}
+.delay-2 {
+	animation-delay: 200ms;
+}
+.delay-3 {
+	animation-delay: 300ms;
+}
+.delay-4 {
+	animation-delay: 400ms;
+}
+
+/* Scroll indicator animation */
+.scroll-indicator {
+	animation: bounceSoft 2s infinite ease-in-out;
+	cursor: default;
+	user-select: none;
+}
+
+@keyframes bounceSoft {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(10px);
+	}
+}
+
+.hero-title {
+	font-family: 'Inter', system-ui, sans-serif;
+	font-weight: 900;
+	font-size: 5.5rem;
+	text-transform: uppercase;
+	background: linear-gradient(
+		to right,
+		#38bdf8,
+		#34d399,
+		#fbbf24,
+		#f97316,
+		#ec4899,
+		#a78bfa,
+		#38bdf8
+	);
+	background-size: 200% auto;
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	color: transparent;
+	letter-spacing: 2px;
+	animation: textShine 8s linear infinite;
+}
+
+.hero-desc {
+	color: #94a3b8;
+	font-weight: 300;
+}
+
+.scroll-text {
+	font-family: 'Courier New', Courier, monospace;
+	letter-spacing: 3px;
+	color: #5fcdfc;
+}
+
+.scroll-arrow {
+	color: #5fcdfc;
+}
+
+.feature-card-title {
+	letter-spacing: 1px;
+}
+
+.feature-card-desc {
+	color: #94a3b8;
+	font-size: 0.95rem;
+}
+
+.hero-badge {
+	font-family: 'Courier New', Courier, monospace;
+	text-transform: uppercase;
+	letter-spacing: 2px !important;
+	position: relative;
+	background: rgba(2, 6, 23, 0.8) !important;
+	border: 1px solid rgba(56, 189, 248, 0.4) !important;
+	box-shadow:
+		0 0 20px rgba(56, 189, 248, 0.15),
+		inset 0 0 10px rgba(56, 189, 248, 0.1);
+	border-radius: 4px !important;
+}
+
+.hero-badge-text {
+	background: linear-gradient(
+		to right,
+		#38bdf8,
+		#34d399,
+		#fbbf24,
+		#f97316,
+		#ec4899,
+		#a78bfa,
+		#38bdf8
+	);
+	background-size: 200% auto;
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	color: #38bdf8;
+	animation: textShine 8s linear infinite;
+}
+
+.hero-badge::before {
+	display: none;
+}
+
+/* Digital Node Highlight Effect */
+.feature-card {
+	position: relative;
+	background: rgba(11, 17, 32, 0.7) !important;
+	border: 1px solid rgba(255, 255, 255, 0.05) !important;
+	border-top: 2px solid var(--card-color) !important;
+	border-radius: 12px;
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	height: 100%;
+	overflow: hidden;
+	will-change: transform, box-shadow;
+	transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	z-index: 1;
+	display: flex; /* Make the card itself a flex container */
+	flex-direction: column; /* Stack content vertically */
+	align-items: center; /* Center content horizontally */
+	text-align: center; /* Ensure text is centered */
+}
+
+.feature-card::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	border-radius: inherit;
+	padding: 2px;
+	background: radial-gradient(
+		400px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+		var(--card-color, rgba(255, 255, 255, 0.1)),
+		transparent 40%
+	);
+	-webkit-mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
+	-webkit-mask-composite: xor;
+	mask-composite: exclude;
+	z-index: -1;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.feature-card::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: radial-gradient(
+		600px circle at var(--mouse-x, 0) var(--mouse-y, 0),
+		var(--card-color-glow, rgba(255, 255, 255, 0.05)),
+		transparent 40%
+	);
+	z-index: -2;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.feature-card:hover {
+	transform: translateY(-8px);
+	box-shadow:
+		0 20px 40px rgba(0, 0, 0, 0.6),
+		0 0 25px var(--card-color-glow);
+	border-color: rgba(255, 255, 255, 0.1) !important;
+	border-top: 2px solid var(--card-color) !important;
+}
+
+.feature-card:hover::before,
+.feature-card:hover::after {
+	opacity: 1;
+}
+
+/* Icon Spring Hover Effect */
+.feature-card .card-body {
+	padding: 1.5rem; /* Default padding for card body */
+	display: flex;
+	flex-direction: column;
+	align-items: center; /* Center children horizontally */
+	justify-content: space-between; /* Distribute space vertically */
+	flex-grow: 1; /* Allow it to grow */
+	width: 100%; /* Ensure it takes full width of its parent */
+}
+.feature-card .icon-wrapper {
+	width: 76px;
+	height: 76px;
+	border-radius: 16px;
+	background: rgba(255, 255, 255, 0.02);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	transform: rotate(45deg);
+	transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.icon-wrapper > div {
+	transform: rotate(-45deg);
+}
+
+.feature-card:hover .icon-wrapper {
+	transform: rotate(45deg) scale(1.15) translate(-4px, -4px);
+	box-shadow: 0 0 25px var(--card-color-glow);
+	border-color: var(--card-color);
+}
+
+.feature-btn {
+	font-family: 'Courier New', Courier, monospace;
+	letter-spacing: 2px !important;
+	text-transform: uppercase;
+	border: 1px solid var(--card-color) !important;
+	background: rgba(255, 255, 255, 0.02) !important;
+	color: var(--card-color) !important;
+	border-radius: 4px !important;
+	transition: all 0.3s ease;
+}
+
+.feature-btn:hover {
+	background-color: var(--card-color) !important;
+	color: #020617 !important;
+	box-shadow: 0 0 20px var(--card-color, rgba(56, 189, 248, 0.4));
+}

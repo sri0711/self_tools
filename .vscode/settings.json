@@ -1,9 +1,11 @@
 {
 	"cSpell.words": [
+		"apikey",
 		"bespin",
 		"codeschool",
 		"Dataclass",
 		"defval",
+		"doublequoted",
 		"greenscreen",
 		"hightlight",
 		"microlink",
@@ -11,6 +13,7 @@
 		"papaparse",
 		"paraiso",
 		"railscasts",
+		"reqwest",
 		"serde",
 		"shapeshifter",
 		"summerfruit",

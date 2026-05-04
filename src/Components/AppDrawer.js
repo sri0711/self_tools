@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import JsonViewerThemes from './JsonViewerThemes';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCurrentScreen } from '../redux/userSettings';
+import '../Styles/AppDrawer.css';
 
 const availableScreens = {
 	'/': 'Home',
@@ -11,7 +12,9 @@ const availableScreens = {
 	'/format': 'Code Formatter',
 	'/viewer': 'JSON Editor',
 	'/url-manipulator': 'URL Manipulator',
-	'/json-model-generator': 'JSON Model Generator'
+	'/json-model-generator': 'JSON Model Generator',
+	'/json-analyser': 'JSON Analyser',
+	'/json-validator': 'JSON Validator'
 };
 
 const screenThemes = {
@@ -21,7 +24,9 @@ const screenThemes = {
 	'/format': 'theme-purple',
 	'/viewer': 'theme-cyan',
 	'/url-manipulator': 'theme-pink',
-	'/json-model-generator': 'theme-red'
+	'/json-model-generator': 'theme-red',
+	'/json-analyser': 'theme-orange',
+	'/json-validator': 'theme-blue'
 };
 
 function AppDrawer({ show, onHide, onItemClick }) {
@@ -111,6 +116,22 @@ function AppDrawer({ show, onHide, onItemClick }) {
 						onClick={clickHandler}
 					>
 						URL Manipulator
+					</Link>
+
+					<Link
+						to="/json-analyser"
+						className={getLinkClass('/json-analyser')}
+						onClick={clickHandler}
+					>
+						JSON Analyser
+					</Link>
+
+					<Link
+						to="/json-validator"
+						className={getLinkClass('/json-validator')}
+						onClick={clickHandler}
+					>
+						JSON Validator
 					</Link>
 
 					{currentScreen === '/viewer' && <JsonViewerThemes />}

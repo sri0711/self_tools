@@ -7,6 +7,7 @@ import {
 	writeDbMeta
 } from '../Tools/clientDatabase';
 import { processCsvExport } from '../Tools/exportUtils';
+import '../Styles/DynamicFilter.css';
 
 const MAX_TOGGLE_OPTIONS = 7;
 const MAX_DROPDOWN_OPTIONS = 15;
@@ -658,6 +659,7 @@ function DynamicFilter({
 								fontWeight: 'bold',
 								fontSize: '14px'
 							}}
+							className="custom-progress-bar w-50"
 						/>
 
 						{isFiltering && (
@@ -687,6 +689,7 @@ function DynamicFilter({
 								fontWeight: 'bold',
 								fontSize: '14px'
 							}}
+							className="custom-progress-bar"
 						/>
 					</div>
 				)}

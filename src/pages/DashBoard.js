@@ -12,6 +12,7 @@ import { Spinner, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { setJsonData } from '../redux/JsonHandler';
 import { setCurrentScreen } from '../redux/userSettings';
+import '../Styles/DashBoard.css';
 
 function DashBoard({ onMenuClick }) {
 	const dashboardData = useSelector((state) => state.dashboard_data.value);
@@ -148,6 +149,13 @@ function DashBoard({ onMenuClick }) {
 		});
 	};
 
+	const handleToAnalyser = () => {
+		dispatch(setCurrentScreen('/json-analyser'));
+		navigate('/json-analyser', {
+			state: { jsonInput: JSON.stringify(filteredData, null, 2) }
+		});
+	};
+
 	return (
 		<div className="p-4 tool-page-bg theme-amber d-flex flex-column min-vh-100">
 			<FileHandlerModel />
@@ -212,6 +220,13 @@ function DashBoard({ onMenuClick }) {
 							<Button
 								variant="none"
 								className="hud-btn-secondary fw-bold btn-sm py-1"
+								onClick={handleToAnalyser}
+							>
+								↗ ANALYSER
+							</Button>
+							<Button
+								variant="none"
+								className="hud-btn-secondary fw-bold btn-sm py-1"
 								onClick={onMenuClick}
 							>
 								[ ☰ MENU ]
@@ -227,8 +242,7 @@ function DashBoard({ onMenuClick }) {
 							isDbPaginated={isDbPaginated}
 						/>
 						<div
-							className="flex-grow-1 overflow-auto rounded border border-secondary border-opacity-25"
-							style={{ background: '#0b1220' }}
+							className="flex-grow-1 overflow-auto rounded border border-secondary border-opacity-25 dashboard-table-wrapper"
 						>
 							<JsonTable
 								data={filteredData}

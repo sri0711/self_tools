@@ -7,7 +7,8 @@ import {
 	Card,
 	Nav,
 	Tab,
-	Spinner
+	Spinner,
+	Modal
 } from 'react-bootstrap';
 import JsonView from '@microlink/react-json-view';
 import { generateRequestCode } from '../Tools/requestCodeGenerator';
@@ -54,6 +55,8 @@ function URLManipulator({ onMenuClick }) {
 	const [useProxy, setUseProxy] = useState(false);
 	const navigate = useNavigate();
 	const dispatch = useDispatch();
+
+	const [alertMsg, setAlertMsg] = useState('');
 
 	const parsedHeaders = useMemo(() => {
 		try {
@@ -200,7 +203,7 @@ function URLManipulator({ onMenuClick }) {
 		try {
 			const text = await navigator.clipboard.readText();
 			if (!text || !text.trim().toLowerCase().startsWith('curl')) {
-				alert('Clipboard does not contain a valid curl command');
+				setAlertMsg('Clipboard does not contain a valid curl command');
 				return;
 			}
 
@@ -246,7 +249,7 @@ function URLManipulator({ onMenuClick }) {
 				setHeaders(JSON.stringify(parsedHeaders, null, 2));
 			if (parsedBody) setBody(parsedBody);
 		} catch (err) {
-			alert(
+			setAlertMsg(
 				'Failed to read clipboard or parse cURL. Make sure you have granted clipboard permissions.'
 			);
 		}
@@ -404,7 +407,6 @@ function URLManipulator({ onMenuClick }) {
 		}
 	};
 
-
 	const handleToEditor = () => {
 		if (response?.data) {
 			dispatch(setJsonData(response.data));
@@ -426,18 +428,30 @@ function URLManipulator({ onMenuClick }) {
 		}
 	};
 
+	const handleToAnalyser = () => {
+		if (response?.data) {
+			const strData =
+				typeof response.data === 'object'
+					? JSON.stringify(response.data, null, 2)
+					: response.data;
+			dispatch(setCurrentScreen('/json-analyser'));
+			navigate('/json-analyser', {
+				state: { jsonInput: strData }
+			});
+		}
+	};
+
 	const handleToDashboard = () => {
 		if (response?.data && Array.isArray(response.data)) {
 			dispatch(setDashboardData(response.data));
 			dispatch(setCurrentScreen('/dashboard'));
 			navigate('/dashboard');
 		} else {
-			alert(
+			setAlertMsg(
 				'Response data must be an array of objects to be viewed in the Dashboard.'
 			);
 		}
 	};
-
 
 	const handleQueryParamChange = (id, field, value) => {
 		setQueryParams((current) => {
@@ -488,13 +502,12 @@ function URLManipulator({ onMenuClick }) {
 				syncParamsToUrl(newParams);
 				setParamsMode('kv');
 			} catch (err) {
-				alert(
+				setAlertMsg(
 					'Invalid JSON format. Please fix syntax errors before switching back to Key-Value mode.'
 				);
 			}
 		}
 	};
-
 
 	const updateFormData = (id, field, val) => {
 		setFormDataParams((current) =>
@@ -510,7 +523,6 @@ function URLManipulator({ onMenuClick }) {
 	const removeFormDataRow = (id) => {
 		setFormDataParams((current) => current.filter((p) => p.id !== id));
 	};
-
 
 	const renderAuth = () => {
 		if (authType === 'bearer') {
@@ -1040,6 +1052,16 @@ function URLManipulator({ onMenuClick }) {
 												>
 													↗ MODEL GEN
 												</Button>
+												<Button
+													variant="none"
+													className="hud-btn-secondary fw-bold py-0 px-2"
+													style={{
+														fontSize: '0.75rem'
+													}}
+													onClick={handleToAnalyser}
+												>
+													↗ ANALYSER
+												</Button>
 												{Array.isArray(
 													response.data
 												) && (
@@ -1127,15 +1149,7 @@ function URLManipulator({ onMenuClick }) {
 													</Nav>
 													<Tab.Content>
 														<Tab.Pane eventKey="res-body">
-															<div
-																className="code-block"
-																style={{
-																	minHeight:
-																		'400px',
-																	overflow:
-																		'auto'
-																}}
-															>
+															<div className="code-block code-block-scrollable">
 																{response.mediaType ===
 																'image' ? (
 																	<img
@@ -1233,12 +1247,8 @@ function URLManipulator({ onMenuClick }) {
 														</Tab.Pane>
 														<Tab.Pane eventKey="res-headers">
 															<pre
-																className="code-block"
+																className="code-block code-block-scrollable"
 																style={{
-																	minHeight:
-																		'400px',
-																	overflow:
-																		'auto',
 																	color: '#34d399'
 																}}
 															>
@@ -1251,12 +1261,8 @@ function URLManipulator({ onMenuClick }) {
 														</Tab.Pane>
 														<Tab.Pane eventKey="res-cookies">
 															<pre
-																className="code-block"
+																className="code-block code-block-scrollable"
 																style={{
-																	minHeight:
-																		'400px',
-																	overflow:
-																		'auto',
 																	color: '#fbbf24'
 																}}
 															>
@@ -1338,12 +1344,8 @@ function URLManipulator({ onMenuClick }) {
 										</Form.Select>
 
 										<div
-											className="code-block"
-											style={{
-												minHeight: '400px',
-												overflow: 'auto',
-												color: '#f8fafc'
-											}}
+											className="code-block code-block-scrollable"
+											style={{ color: '#f8fafc' }}
 										>
 											<Button
 												size="sm"
@@ -1361,6 +1363,40 @@ function URLManipulator({ onMenuClick }) {
 					</Tab.Container>
 				</Col>
 			</Row>
+
+			<Modal
+				show={!!alertMsg}
+				onHide={() => setAlertMsg('')}
+				centered
+				contentClassName="bg-transparent border-0"
+			>
+				<div className="glass-panel system-alert-panel theme-pink-alert">
+					<div className="p-3 d-flex justify-content-between align-items-center system-alert-header">
+						<span className="font-monospace small fw-bold alert-text">
+							SYSTEM_ALERT // NOTICE
+						</span>
+						<Button
+							variant="none"
+							className="p-0 m-0 fs-5 lh-1 alert-text border-0"
+							onClick={() => setAlertMsg('')}
+						>
+							&times;
+						</Button>
+					</div>
+					<div className="p-4 text-light font-monospace fs-6">
+						{alertMsg}
+					</div>
+					<div className="p-3 text-end system-alert-footer">
+						<Button
+							variant="none"
+							className="hud-btn-secondary fw-bold"
+							onClick={() => setAlertMsg('')}
+						>
+							[ ACKNOWLEDGE ]
+						</Button>
+					</div>
+				</div>
+			</Modal>
 		</div>
 	);
 }

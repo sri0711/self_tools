@@ -64,14 +64,20 @@ function WhatsNewModal() {
 
 			<Modal show={show} onHide={() => setShow(false)} centered size="lg">
 				<Modal.Header closeButton>
-					<Modal.Title>
+					<Modal.Title
+						className="font-monospace fw-bold"
+						style={{ color: 'var(--theme-color, #38bdf8)' }}
+					>
 						What's new in {title ? `- ${title}` : ''} v{version}
 					</Modal.Title>
 				</Modal.Header>
 				<Modal.Body>
-					<p className="text-info mb-4">
-						<strong>Change Log</strong> of the latest updates and
-						improvements for Self Tools.
+					<p
+						className="mb-4"
+						style={{ color: 'var(--theme-color, #38bdf8)' }}
+					>
+						<strong className="text-light">Change Log</strong> of
+						the latest updates and improvements for Self Tools.
 					</p>
 					<div
 						style={{
@@ -87,8 +93,11 @@ function WhatsNewModal() {
 						{changes.map((change, index) => (
 							<div key={index} className="changeItem">
 								<div
-									className="text-info fw-bold mb-2"
-									style={{ fontSize: '1.1rem' }}
+									className="fw-bold mb-2 font-monospace"
+									style={{
+										fontSize: '1.1rem',
+										color: 'var(--theme-color, #38bdf8)'
+									}}
 								>
 									{change.version}{' '}
 									{change.title ? `- ${change.title}` : ''}
@@ -105,15 +114,20 @@ function WhatsNewModal() {
 				</Modal.Body>
 				<Modal.Footer>
 					<Button
-						variant="secondary"
+						variant="none"
+						className="hud-btn-secondary fw-bold"
 						onClick={() =>
 							window.open('https://github.com/sri0711/self_tools')
 						}
 					>
-						View Source
+						[ VIEW SOURCE ]
 					</Button>
-					<Button variant="secondary" onClick={() => setShow(false)}>
-						Close
+					<Button
+						variant="none"
+						className="hud-btn-primary fw-bold"
+						onClick={() => setShow(false)}
+					>
+						[ CLOSE ]
 					</Button>
 				</Modal.Footer>
 			</Modal>

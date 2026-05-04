@@ -1,0 +1,48 @@
+/* =========================================
+   JSON Validator Styles
+========================================= */
+
+.validator-panel-header {
+	border-color: rgba(96, 165, 250, 0.2) !important;
+	background: rgba(255, 255, 255, 0.02) !important;
+}
+
+.validator-action-btn {
+	font-size: 0.8rem;
+	border-color: #60a5fa !important;
+	color: #60a5fa !important;
+}
+
+.validator-log-container {
+	background-color: #0a0f1c;
+}
+
+.validator-shield {
+	filter: drop-shadow(0 0 10px rgba(96, 165, 250, 0.8));
+}
+
+.validator-passed-text {
+	letter-spacing: 1px;
+	color: #60a5fa;
+}
+
+.validator-error-card {
+	background: rgba(15, 23, 42, 0.95);
+}
+
+.validator-error-card.error-severe {
+	border: 1px solid rgba(248, 113, 113, 0.3);
+	border-left: 4px solid #f87171;
+}
+
+.validator-error-card.error-warning {
+	border: 1px solid rgba(251, 191, 36, 0.3);
+	border-left: 4px solid #fbbf24;
+}
+
+.validator-line-text.error-severe {
+	color: #f87171;
+}
+.validator-line-text.error-warning {
+	color: #fbbf24;
+}

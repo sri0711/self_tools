@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 import notFoundGif from '../images/notFound.gif';
-import './NotFound.css';
+import '../Styles/NotFound.css';
 import { useDispatch } from 'react-redux';
 import { setCurrentScreen } from '../redux/userSettings';
 
