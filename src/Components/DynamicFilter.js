@@ -7,6 +7,7 @@ import {
 	writeDbMeta
 } from '../Tools/clientDatabase';
 import { processCsvExport } from '../Tools/exportUtils';
+import '../Styles/DynamicFilter.css';
 
 const MAX_TOGGLE_OPTIONS = 7;
 const MAX_DROPDOWN_OPTIONS = 15;

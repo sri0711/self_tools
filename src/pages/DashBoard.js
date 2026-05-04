@@ -12,6 +12,7 @@ import { Spinner, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { setJsonData } from '../redux/JsonHandler';
 import { setCurrentScreen } from '../redux/userSettings';
+import '../Styles/DashBoard.css';
 
 function DashBoard({ onMenuClick }) {
 	const dashboardData = useSelector((state) => state.dashboard_data.value);

@@ -52,6 +52,13 @@ function Viewer({ onMenuClick }) {
 		});
 	};
 
+	const handleToValidator = () => {
+		dispatch(setCurrentScreen('/json-validator'));
+		navigate('/json-validator', {
+			state: { jsonInput: JSON.stringify(jsonData, null, 2) }
+		});
+	};
+
 	return (
 		<div className="p-4 tool-page-bg theme-cyan d-flex flex-column min-vh-100">
 			<div className="glass-panel flex-grow-1 p-0 overflow-hidden border-0 d-flex flex-column">
@@ -66,6 +73,13 @@ function Viewer({ onMenuClick }) {
 						INPUT_STREAM // JSON
 					</span>
 					<div className="d-flex gap-2">
+						<Button
+							variant="none"
+							className="hud-btn-secondary fw-bold btn-sm py-1"
+							onClick={handleToValidator}
+						>
+							↗ VALIDATOR
+						</Button>
 						<Button
 							variant="none"
 							className="hud-btn-secondary fw-bold btn-sm py-1"

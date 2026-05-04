@@ -1,0 +1,41 @@
+.appDrawer {
+	width: 100% !important;
+	max-width: 350px;
+	background-color: rgba(2, 6, 23, 0.6) !important;
+	background-image: none !important;
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	border-left: 1px solid var(--theme-color, rgba(255, 255, 255, 0.1)) !important;
+	border-top: none;
+	border-bottom: none;
+	border-right: none;
+	box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+	border-top-left-radius: 16px;
+	border-bottom-left-radius: 16px;
+	color: #f8fafc !important;
+}
+
+.appDrawer .offcanvas {
+	width: 100% !important;
+	max-width: 350px;
+}
+
+.appDrawer .offcanvas-header {
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.appDrawer .offcanvas-title { color: #f8fafc; }
+.appDrawer .btn-close { filter: invert(1) !important; opacity: 0.8; }
+.appDrawer .nav-link {
+	color: #cbd5e1 !important;
+	transition: all 0.3s ease;
+	border-radius: 8px;
+	padding: 10px 15px;
+}
+.appDrawer .nav-link:hover { background: rgba(255, 255, 255, 0.05); color: var(--theme-color, #38bdf8) !important; transform: translateX(5px); }
+.appDrawer .nav-link.active-link {
+	color: var(--theme-color, #38bdf8) !important;
+	background: rgba(255, 255, 255, 0.05);
+	border-left: 4px solid var(--theme-color, #38bdf8);
+	border-radius: 0 8px 8px 0;
+}

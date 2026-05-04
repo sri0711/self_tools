@@ -9,19 +9,23 @@ import { ReactComponent as UrlIcon } from '../images/url-icon.svg';
 import { ReactComponent as DashboardIcon } from '../images/dashboard-icon.svg';
 import { ReactComponent as FormatIcon } from '../images/format-icon.svg';
 import { ReactComponent as AnalyzeIcon } from '../images/analyze-icon.svg';
+import { ReactComponent as ValidatorIcon } from '../images/validator-icon.svg';
 import ParticleNetwork from '../Components/ParticleNetwork';
 import PackageJson from '../../package.json';
+import '../Styles/Home.css';
 
 function FeatureCardItem({ feat, dispatch }) {
 	const cardRef = useRef(null);
 
 	const handleMouseMove = (e) => {
 		if (!cardRef.current) return;
-		const rect = cardRef.current.getBoundingClientRect();
-		const x = e.clientX - rect.left;
-		const y = e.clientY - rect.top;
-		cardRef.current.style.setProperty('--mouse-x', `${x}px`);
-		cardRef.current.style.setProperty('--mouse-y', `${y}px`);
+		requestAnimationFrame(() => {
+			const rect = cardRef.current.getBoundingClientRect();
+			const x = e.clientX - rect.left;
+			const y = e.clientY - rect.top;
+			cardRef.current.style.setProperty('--mouse-x', `${x}px`);
+			cardRef.current.style.setProperty('--mouse-y', `${y}px`);
+		});
 	};
 
 	return (
@@ -34,9 +38,9 @@ function FeatureCardItem({ feat, dispatch }) {
 				'--card-color-glow': `${feat.color}40`
 			}}
 		>
-			<Card.Body className="d-flex flex-column p-0">
+			<Card.Body className="d-flex flex-column">
 				<div
-					className="icon-wrapper mb-5 mt-4 mx-auto d-flex align-items-center justify-content-center"
+					className="icon-wrapper mx-auto d-flex align-items-center justify-content-center"
 					style={{
 						color: feat.color,
 						filter: `drop-shadow(0 0 12px ${feat.color}40)`
@@ -99,6 +103,14 @@ function Home({ onMenuClick }) {
 			color: '#a78bfa'
 		},
 		{
+			id: 'JSONAnalyser',
+			title: 'JSON Analyser',
+			desc: 'Visually build data pipelines using a no-code block interface to dynamically map, filter, reduce, and manipulate JSON payloads.',
+			icon: <AnalyzeIcon width="48" height="48" />,
+			path: '/json-analyser',
+			color: '#f97316'
+		},
+		{
 			id: 'JSONModelGenerator',
 			title: 'JSON Model Generator',
 			desc: 'Generate data models, schemas, interfaces, or classes instantly from your JSON payloads.',
@@ -107,20 +119,20 @@ function Home({ onMenuClick }) {
 			color: '#ef4444'
 		},
 		{
+			id: 'jsonValidator',
+			title: 'JSON Validator',
+			desc: 'Detects syntax errors in real-time and auto-fixes basic JSON mistakes like missing quotes or trailing commas.',
+			icon: <ValidatorIcon width="48" height="48" />,
+			path: '/json-validator',
+			color: '#60a5fa'
+		},
+		{
 			id: 'URLManipulator',
 			title: 'URL Manipulator',
 			desc: 'Manipulate, test, and generate URLs with ease. Export your configured requests to various programming languages.',
 			icon: <UrlIcon width="48" height="48" />,
 			path: '/url-manipulator',
 			color: '#ec4899'
-		},
-		{
-			id: 'JSONAnalyser',
-			title: 'JSON Analyser',
-			desc: 'Visually build data pipelines using a no-code block interface to dynamically map, filter, reduce, and manipulate JSON payloads.',
-			icon: <AnalyzeIcon width="48" height="48" />,
-			path: '/json-analyser',
-			color: '#f97316'
 		}
 	];
 
@@ -154,14 +166,14 @@ function Home({ onMenuClick }) {
 							</p>
 
 							<div
-								className="d-flex flex-wrap justify-content-center gap-3 mb-5 fade-in-up delay-3 font-monospace small"
+								className="d-flex flex-wrap justify-content-center gap-3 mb-4 fade-in-up delay-3 font-monospace small"
 								style={{ color: '#38bdf8', opacity: 0.9 }}
 							>
 								<span>[ 🔒 ZERO SERVER CALLS ]</span>
 								<span>[ 🚀 CONSTANTLY EXPANDING ]</span>
 							</div>
 
-							<div className="scroll-indicator mt-5 opacity-100 fade-in-up delay-4">
+							<div className="scroll-indicator mt-4 opacity-100 fade-in-up delay-4">
 								<div className="fs-4 text-uppercase mb-2 scroll-text">
 									SCROLL_TO_ACCESS
 								</div>

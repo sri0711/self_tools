@@ -28,6 +28,7 @@ import { ReactComponent as SkipIcon } from '../images/blocks/skip.svg';
 import { ReactComponent as ReverseIcon } from '../images/blocks/reverse.svg';
 import { ReactComponent as FlattenIcon } from '../images/blocks/flatten.svg';
 import { ReactComponent as ReplaceValueIcon } from '../images/blocks/replace-value.svg';
+import '../Styles/JsonAnalyzer.css';
 
 function JsonAnalyzer({ onMenuClick }) {
 	const location = useLocation();
@@ -56,27 +57,50 @@ function JsonAnalyzer({ onMenuClick }) {
 
 	const [searchQueries, setSearchQueries] = useState({});
 
-	const availableKeys = useMemo(() => {
+	const [stepResults, setStepResults] = useState({});
+
+	const [blocks, setBlocks] = useState([]);
+	const [connections, setConnections] = useState([]);
+	const [drawingConnection, setDrawingConnection] = useState(null);
+	const [draggingNode, setDraggingNode] = useState(null);
+
+	const canvasRef = useRef(null);
+
+	const blockKeysMap = useMemo(() => {
+		const map = {};
+		let baseData = null;
 		try {
-			const parsed = JSON.parse(jsonInput);
+			baseData = JSON.parse(jsonInput);
+		} catch {}
+
+		const extractKeys = (data) => {
 			const keys = new Set();
 			const extract = (obj) => {
 				if (typeof obj === 'object' && obj !== null) {
 					if (Array.isArray(obj)) {
-						obj.forEach(extract);
+						obj.slice(0, 50).forEach(extract); // Limit array search depth for performance
 					} else {
-						Object.keys(obj).forEach((k) => {
-							keys.add(k);
-						});
+						Object.keys(obj).forEach((k) => keys.add(k));
 					}
 				}
 			};
-			extract(parsed);
+			extract(data);
 			return Array.from(keys).sort();
-		} catch {
-			return [];
-		}
-	}, [jsonInput]);
+		};
+
+		const baseKeys = extractKeys(baseData);
+
+		blocks.forEach((b) => {
+			const parents = connections.filter((c) => c.to === b.id).map((c) => c.from);
+			if (parents.length > 0 && stepResults[parents[0]] !== undefined) {
+				map[b.id] = extractKeys(stepResults[parents[0]]);
+			} else {
+				map[b.id] = baseKeys;
+			}
+		});
+
+		return { map, baseKeys };
+	}, [jsonInput, blocks, connections, stepResults]);
 
 	const blockIcons = {
 		FILTER: <FilterIcon width="16" height="16" />,
@@ -96,15 +120,6 @@ function JsonAnalyzer({ onMenuClick }) {
 		FLATTEN: <FlattenIcon width="16" height="16" />,
 		REPLACE_VALUE: <ReplaceValueIcon width="16" height="16" />
 	};
-
-	const [stepResults, setStepResults] = useState({});
-
-	const [blocks, setBlocks] = useState([]);
-	const [connections, setConnections] = useState([]);
-	const [drawingConnection, setDrawingConnection] = useState(null);
-	const [draggingNode, setDraggingNode] = useState(null);
-
-	const canvasRef = useRef(null);
 
 	const availableBlocks = [
 		'FILTER',
@@ -416,25 +431,45 @@ function JsonAnalyzer({ onMenuClick }) {
 						);
 					currentData = currentData.length;
 				} else if (type === 'INSERT') {
-					const { key, value } = config;
+					const { key, valueType = 'static', value, startValue, randomType = 'uuid' } = config;
 					if (!key) continue;
 
-					let parsedVal = value;
-					if (!isNaN(value) && value.trim() !== '')
-						parsedVal = Number(value);
-					else if (value === 'true') parsedVal = true;
-					else if (value === 'false') parsedVal = false;
+					let serialCounter = parseInt(startValue, 10);
+					if (isNaN(serialCounter)) serialCounter = 1;
+
+					let parsedStaticVal = value;
+					if (valueType === 'static' && value !== undefined && value !== '') {
+						if (!isNaN(value) && String(value).trim() !== '') parsedStaticVal = Number(value);
+						else if (value === 'true') parsedStaticVal = true;
+						else if (value === 'false') parsedStaticVal = false;
+					}
+
+					const generateValue = () => {
+						if (valueType === 'serial') {
+							return serialCounter++;
+						} else if (valueType === 'random') {
+							if (randomType === 'uuid') return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+							if (randomType === 'name') {
+								const firsts = ['Alex', 'Jordan', 'Taylor', 'Casey', 'Sam', 'Jamie', 'Riley', 'Morgan', 'Avery', 'Quinn', 'Harper'];
+								const lasts = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+								return `${firsts[Math.floor(Math.random() * firsts.length)]} ${lasts[Math.floor(Math.random() * lasts.length)]}`;
+							}
+							if (randomType === 'number') return Math.floor(Math.random() * 1000) + 1;
+							if (randomType === 'boolean') return Math.random() > 0.5;
+						}
+						return parsedStaticVal;
+					};
 
 					if (Array.isArray(currentData)) {
 						currentData = currentData.map((item) => ({
 							...item,
-							[key]: parsedVal
+							[key]: generateValue()
 						}));
 					} else if (
 						typeof currentData === 'object' &&
 						currentData !== null
 					) {
-						currentData = { ...currentData, [key]: parsedVal };
+						currentData = { ...currentData, [key]: generateValue() };
 					}
 				} else if (type === 'EXTRACT_KEYS') {
 					const { keys } = config;
@@ -571,7 +606,7 @@ function JsonAnalyzer({ onMenuClick }) {
 			);
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [jsonInput, blocks]);
+	}, [jsonInput, blocks, connections]);
 
 	useEffect(() => {
 		executePipeline();
@@ -601,6 +636,8 @@ function JsonAnalyzer({ onMenuClick }) {
 		const renderKeySelector = (blockId, field, value, placeholder) => {
 			const handleKeyChange = (val) =>
 				updateBlockConfig(blockId, field, val);
+
+			const availableKeys = blockKeysMap.map[blockId] || blockKeysMap.baseKeys;
 
 			if (availableKeys.length <= 10) {
 				return (
@@ -921,30 +958,77 @@ function JsonAnalyzer({ onMenuClick }) {
 				);
 			case 'INSERT':
 				return (
-					<Row className="g-2 mt-2 font-monospace small">
-						<Col xs={6}>
-							<Form.Control
-								size="sm"
-								placeholder="New Key"
-								value={config.key || ''}
-								onChange={(e) =>
-									handleChange('key', e.target.value)
-								}
-								style={inputStyle}
-							/>
-						</Col>
-						<Col xs={6}>
-							<Form.Control
-								size="sm"
-								placeholder="Static Value"
-								value={config.value || ''}
-								onChange={(e) =>
-									handleChange('value', e.target.value)
-								}
-								style={inputStyle}
-							/>
-						</Col>
-					</Row>
+					<div className="mt-2 font-monospace small">
+						<Row className="g-2">
+							<Col xs={6}>
+								<Form.Control
+									size="sm"
+									placeholder="New Key"
+									value={config.key || ''}
+									onChange={(e) =>
+										handleChange('key', e.target.value)
+									}
+									style={inputStyle}
+								/>
+							</Col>
+							<Col xs={6}>
+								<Form.Select
+									size="sm"
+									value={config.valueType || 'static'}
+									onChange={(e) =>
+										handleChange('valueType', e.target.value)
+									}
+									style={inputStyle}
+								>
+									<option value="static">Static Value</option>
+									<option value="serial">Serial Int</option>
+									<option value="random">Random Data</option>
+								</Form.Select>
+							</Col>
+						</Row>
+						<Row className="g-2 mt-1">
+							<Col xs={12}>
+								{(!config.valueType || config.valueType === 'static') && (
+									<Form.Control
+										size="sm"
+										placeholder="Static Value"
+										value={config.value || ''}
+										onChange={(e) =>
+											handleChange('value', e.target.value)
+										}
+										style={inputStyle}
+									/>
+								)}
+								{config.valueType === 'serial' && (
+									<Form.Control
+										size="sm"
+										type="number"
+										placeholder="Start at (default 1)"
+										value={config.startValue || ''}
+										onChange={(e) =>
+											handleChange('startValue', e.target.value)
+										}
+										style={inputStyle}
+									/>
+								)}
+								{config.valueType === 'random' && (
+									<Form.Select
+										size="sm"
+										value={config.randomType || 'uuid'}
+										onChange={(e) =>
+											handleChange('randomType', e.target.value)
+										}
+										style={inputStyle}
+									>
+										<option value="uuid">UUID v4</option>
+										<option value="name">Random Name</option>
+										<option value="number">Random Number (1-1000)</option>
+										<option value="boolean">Random Boolean</option>
+									</Form.Select>
+								)}
+							</Col>
+						</Row>
+					</div>
 				);
 			case 'REDUCE':
 				return (
@@ -1253,24 +1337,26 @@ function JsonAnalyzer({ onMenuClick }) {
 									const y2 = toBlock.y + 24;
 									const path = drawCurve(x1, y1, x2, y2);
 									return (
-										<path
+										<g
 											key={idx}
-											d={path}
-											stroke="#f97316"
-											strokeWidth="3"
-											fill="none"
-											style={{
-												pointerEvents: 'stroke',
-												cursor: 'pointer'
-											}}
-											onDoubleClick={() =>
+											onDoubleClick={(e) => {
+												e.stopPropagation();
 												setConnections(
 													connections.filter(
-														(c) => c !== conn
+														(c) =>
+															c.from !== conn.from ||
+															c.to !== conn.to
 													)
-												)
-											}
-										/>
+												);
+											}}
+											style={{ cursor: 'pointer', pointerEvents: 'auto' }}
+										>
+											{/* Visible Line */}
+											<path d={path} stroke="#f97316" strokeWidth="3" fill="none" style={{ pointerEvents: 'none' }} />
+											
+											{/* Invisible Hit Area to make double-clicking easier */}
+											<path d={path} stroke="transparent" strokeWidth="20" fill="none" style={{ pointerEvents: 'stroke' }} />
+										</g>
 									);
 								})}
 								{drawingConnection && (
