@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+  <style>
+    @keyframes flyOutInRight {
+      0%, 15% { transform: translateX(0) rotate(0deg); opacity: 1; }
+      35% { transform: translateX(24px) rotate(45deg); opacity: 0; }
+      36% { transform: translateX(-24px) rotate(-180deg); opacity: 0; }
+      65%, 100% { transform: translateX(0) rotate(0deg); opacity: 1; }
+    }
+    @keyframes flyOutInLeft {
+      0%, 15% { transform: translateX(0) rotate(0deg); opacity: 1; }
+      35% { transform: translateX(-24px) rotate(-45deg); opacity: 0; }
+      36% { transform: translateX(24px) rotate(180deg); opacity: 0; }
+      65%, 100% { transform: translateX(0) rotate(0deg); opacity: 1; }
+    }
+    .base-path { opacity: 0.2; }
+    .arrow-right {
+      transform-origin: 14.25px 7.5px;
+      animation: flyOutInRight 3s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    }
+    .arrow-left {
+      transform-origin: 9.75px 16.5px;
+      animation: flyOutInLeft 3s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite 0.5s;
+    }
+  </style>
+  <!-- Faint Base Layer -->
+  <path class="base-path" stroke-linecap="round" stroke-linejoin="round" d="M16.5 3 L21 7.5 L16.5 12 M21 7.5 H7.5" />
+  <path class="base-path" stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 L3 16.5 L7.5 12 M3 16.5 h13.5" />
+  <!-- Animated Flying Arrows -->
+  <path class="arrow-right" stroke-linecap="round" stroke-linejoin="round" d="M16.5 3 L21 7.5 L16.5 12 M21 7.5 H7.5" />
+  <path class="arrow-left" stroke-linecap="round" stroke-linejoin="round" d="M7.5 21 L3 16.5 L7.5 12 M3 16.5 h13.5" />
+</svg>

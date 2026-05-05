@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+	<style>
+		@keyframes bridgeFlow {
+			to { stroke-dashoffset: -4; }
+		}
+		@keyframes bridgePulse {
+			0%, 100% { opacity: 1; }
+			50% { opacity: 0.3; }
+		}
+		.bridge-flow {
+			animation: bridgeFlow 1s linear infinite;
+		}
+		.bridge-blink1 { animation: bridgePulse 1.5s infinite; }
+		.bridge-blink2 { animation: bridgePulse 1.5s infinite 0.2s; }
+		.bridge-blink3 { animation: bridgePulse 1.5s infinite 0.4s; }
+	</style>
+
+	<!-- Left Computer -->
+	<rect x="2" y="4" width="5" height="4" rx="1" />
+	<path d="M4.5 8v2" />
+	<path d="M2.5 10h4" />
+
+	<!-- Right Computer -->
+	<rect x="17" y="4" width="5" height="4" rx="1" />
+	<path d="M19.5 8v2" />
+	<path d="M17.5 10h4" />
+
+	<!-- Network Cables connecting to Bridge -->
+	<!-- Smooth curves dropping from the computer base into the sides of the router -->
+	<path d="M4.5 10v3Q4.5 17 8 17" />
+	<path d="M19.5 10v3Q19.5 17 16 17" />
+	
+	<!-- Network Bridge Device (Router) -->
+	<rect x="8" y="14" width="8" height="6" rx="1.5" />
+	
+	<!-- Router Antennas -->
+	<path d="M10 14v-1.5" />
+	<path d="M14 14v-1.5" />
+
+	<!-- Router Activity Lights -->
+	<circle cx="10" cy="18" r="0.5" fill="currentColor" stroke="none" class="bridge-blink1" />
+	<circle cx="12" cy="18" r="0.5" fill="currentColor" stroke="none" class="bridge-blink2" />
+	<circle cx="14" cy="18" r="0.5" fill="currentColor" stroke="none" class="bridge-blink3" />
+	
+	<!-- Animated P2P Direct Signal across the top -->
+	<path d="M8 6h8" stroke-dasharray="2 2" class="bridge-flow" />
+	
+	<!-- Data Transfer Arrows -->
+	<path d="M14 4l2 2-2 2" />
+	<path d="M10 4l-2 2 2 2" />
+</svg>
