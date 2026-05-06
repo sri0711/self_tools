@@ -14,7 +14,8 @@ const availableScreens = {
 	'/url-manipulator': 'URL Manipulator',
 	'/json-model-generator': 'JSON Model Generator',
 	'/json-analyser': 'JSON Analyser',
-	'/json-validator': 'JSON Validator'
+	'/json-validator': 'JSON Validator',
+	'/data-bridge': 'Data Bridge'
 };
 
 const screenThemes = {
@@ -26,7 +27,8 @@ const screenThemes = {
 	'/url-manipulator': 'theme-pink',
 	'/json-model-generator': 'theme-red',
 	'/json-analyser': 'theme-orange',
-	'/json-validator': 'theme-blue'
+	'/json-validator': 'theme-blue',
+	'/data-bridge': 'theme-teal'
 };
 
 function AppDrawer({ show, onHide, onItemClick }) {
@@ -132,6 +134,14 @@ function AppDrawer({ show, onHide, onItemClick }) {
 						onClick={clickHandler}
 					>
 						JSON Validator
+					</Link>
+
+					<Link
+						to="/data-bridge"
+						className={getLinkClass('/data-bridge')}
+						onClick={clickHandler}
+					>
+						Data Bridge
 					</Link>
 
 					{currentScreen === '/viewer' && <JsonViewerThemes />}

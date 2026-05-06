@@ -12,6 +12,7 @@
 		"bootstrap": "^5.3.8",
 		"highlight.js": "^11.11.1",
 		"httpsnippet": "^3.0.10",
+		"html5-qrcode": "^2.3.8",
 		"monaco-editor": "^0.55.1",
 		"papaparse": "^5.5.3",
 		"prettier": "^3.8.3",

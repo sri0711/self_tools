@@ -10,6 +10,7 @@ import { ReactComponent as DashboardIcon } from '../images/dashboard-icon.svg';
 import { ReactComponent as FormatIcon } from '../images/format-icon.svg';
 import { ReactComponent as AnalyzeIcon } from '../images/analyze-icon.svg';
 import { ReactComponent as ValidatorIcon } from '../images/validator-icon.svg';
+import { ReactComponent as DataBridgeIcon } from '../images/data-bridge-icon.svg';
 import ParticleNetwork from '../Components/ParticleNetwork';
 import PackageJson from '../../package.json';
 import '../Styles/Home.css';
@@ -20,6 +21,7 @@ function FeatureCardItem({ feat, dispatch }) {
 	const handleMouseMove = (e) => {
 		if (!cardRef.current) return;
 		requestAnimationFrame(() => {
+			if (!cardRef.current) return;
 			const rect = cardRef.current.getBoundingClientRect();
 			const x = e.clientX - rect.left;
 			const y = e.clientY - rect.top;
@@ -38,6 +40,9 @@ function FeatureCardItem({ feat, dispatch }) {
 				'--card-color-glow': `${feat.color}40`
 			}}
 		>
+			{feat.experimental_feature && (
+				<div className="corner-ribbon">BETA</div>
+			)}
 			<Card.Body className="d-flex flex-column">
 				<div
 					className="icon-wrapper mx-auto d-flex align-items-center justify-content-center"
@@ -48,7 +53,7 @@ function FeatureCardItem({ feat, dispatch }) {
 				>
 					<div>{feat.icon}</div>
 				</div>
-				<Card.Title className="fw-bolder mb-3 fs-4 text-uppercase feature-card-title">
+				<Card.Title className="fw-bolder mb-4 fs-4 text-uppercase feature-card-title">
 					{feat.title}
 				</Card.Title>
 				<Card.Text className="mb-4 lh-lg flex-grow-1 feature-card-desc">
@@ -76,7 +81,8 @@ function Home({ onMenuClick }) {
 			desc: 'Interactive JSON viewer and editor with syntax highlighting, auto-formatting, and multiple rich dark themes.',
 			icon: <ViewerIcon width="48" height="48" />,
 			path: '/viewer',
-			color: '#38bdf8'
+			color: '#38bdf8',
+			experimental_feature: false
 		},
 		{
 			id: 'diff',
@@ -84,7 +90,8 @@ function Home({ onMenuClick }) {
 			desc: 'Advanced side-by-side comparison tool for payloads to instantly spot additions, deletions, and modifications.',
 			icon: <DiffIcon width="48" height="48" />,
 			path: '/jsonDiff',
-			color: '#34d399'
+			color: '#34d399',
+			experimental_feature: false
 		},
 		{
 			id: 'dashboard',
@@ -92,7 +99,8 @@ function Home({ onMenuClick }) {
 			desc: 'Process massive CSV and Excel files entirely in the browser. Features dynamic background filtering and fast exports.',
 			icon: <DashboardIcon width="48" height="48" />,
 			path: '/dashboard',
-			color: '#fbbf24'
+			color: '#fbbf24',
+			experimental_feature: false
 		},
 		{
 			id: 'format',
@@ -100,7 +108,8 @@ function Home({ onMenuClick }) {
 			desc: 'Universal code formatter powered by Prettier & Monaco. Auto-detects language and supports over 20 syntax types.',
 			icon: <FormatIcon width="48" height="48" />,
 			path: '/format',
-			color: '#a78bfa'
+			color: '#a78bfa',
+			experimental_feature: false
 		},
 		{
 			id: 'JSONAnalyser',
@@ -108,7 +117,8 @@ function Home({ onMenuClick }) {
 			desc: 'Visually build data pipelines using a no-code block interface to dynamically map, filter, reduce, and manipulate JSON payloads.',
 			icon: <AnalyzeIcon width="48" height="48" />,
 			path: '/json-analyser',
-			color: '#f97316'
+			color: '#f97316',
+			experimental_feature: false
 		},
 		{
 			id: 'JSONModelGenerator',
@@ -116,7 +126,8 @@ function Home({ onMenuClick }) {
 			desc: 'Generate data models, schemas, interfaces, or classes instantly from your JSON payloads.',
 			icon: <ModelIcon width="48" height="48" />,
 			path: '/json-model-generator',
-			color: '#ef4444'
+			color: '#ef4444',
+			experimental_feature: false
 		},
 		{
 			id: 'jsonValidator',
@@ -124,7 +135,8 @@ function Home({ onMenuClick }) {
 			desc: 'Detects syntax errors in real-time and auto-fixes basic JSON mistakes like missing quotes or trailing commas.',
 			icon: <ValidatorIcon width="48" height="48" />,
 			path: '/json-validator',
-			color: '#60a5fa'
+			color: '#60a5fa',
+			experimental_feature: false
 		},
 		{
 			id: 'URLManipulator',
@@ -132,7 +144,17 @@ function Home({ onMenuClick }) {
 			desc: 'Manipulate, test, and generate URLs with ease. Export your configured requests to various programming languages.',
 			icon: <UrlIcon width="48" height="48" />,
 			path: '/url-manipulator',
-			color: '#ec4899'
+			color: '#ec4899',
+			experimental_feature: false
+		},
+		{
+			id: 'dataBridge',
+			title: 'DATA Bridge',
+			desc: 'Establish secure P2P tunnels across local or public networks. Chat and beam files directly between multiple devices with zero server calls.',
+			icon: <DataBridgeIcon width="48" height="48" />,
+			path: '/data-bridge',
+			color: '#14b8a6',
+			experimental_feature: true
 		}
 	];
 

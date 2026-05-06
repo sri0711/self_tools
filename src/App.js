@@ -18,6 +18,7 @@ import modelIconUrl from './images/model-icon.svg';
 import urlIconUrl from './images/url-icon.svg';
 import analyzeIconUrl from './images/analyze-icon.svg';
 import validatorIconUrl from './images/validator-icon.svg';
+import DataBridgeIconUrl from './images/data-bridge-icon.svg';
 
 const Home = lazy(() => import('./pages/Home'));
 const DashBoard = lazy(() => import('./pages/DashBoard'));
@@ -28,6 +29,7 @@ const URLManipulator = lazy(() => import('./pages/URLManipulator'));
 const JSONModelGenerator = lazy(() => import('./pages/JSONModelGenerator'));
 const JsonAnalyzer = lazy(() => import('./pages/JsonAnalyzer'));
 const JsonValidator = lazy(() => import('./pages/JsonValidator'));
+const DataBridge = lazy(() => import('./pages/DataBridge'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const screenThemes = {
@@ -39,7 +41,8 @@ const screenThemes = {
 	'/url-manipulator': 'theme-pink',
 	'/json-model-generator': 'theme-red',
 	'/json-analyser': 'theme-orange',
-	'/json-validator': 'theme-blue'
+	'/json-validator': 'theme-blue',
+	'/data-bridge': 'theme-teal'
 };
 
 function PageTitleUpdater() {
@@ -55,7 +58,8 @@ function PageTitleUpdater() {
 			'/url-manipulator': 'URL Manipulator | Self Tools',
 			'/json-model-generator': 'JSON Model Generator | Self Tools',
 			'/json-analyser': 'JSON Analyser | Self Tools',
-			'/json-validator': 'JSON Validator | Self Tools'
+			'/json-validator': 'JSON Validator | Self Tools',
+			'/data-bridge': 'Data Bridge | Self Tools'
 		};
 		document.title = titles[location.pathname] || 'Not Found | Self Tools';
 
@@ -67,7 +71,8 @@ function PageTitleUpdater() {
 			'/url-manipulator': urlIconUrl,
 			'/json-model-generator': modelIconUrl,
 			'/json-analyser': analyzeIconUrl,
-			'/json-validator': validatorIconUrl
+			'/json-validator': validatorIconUrl,
+			'/data-bridge': DataBridgeIconUrl
 		};
 
 		let link = document.querySelector("link[rel~='icon']");
@@ -207,6 +212,12 @@ function App() {
 							path="/json-validator"
 							element={
 								<JsonValidator onMenuClick={handleMenuClick} />
+							}
+						/>
+						<Route
+							path="/data-bridge"
+							element={
+								<DataBridge onMenuClick={handleMenuClick} />
 							}
 						/>
 						<Route path="*" element={<NotFound />} />
